@@ -10,7 +10,6 @@ is_sentence_complete_regex
 )
 import time
 import flashinfer
-import json
 from ..logging_config import setup_logger
 from ..utils import TextColors
 logger = setup_logger()
@@ -73,8 +72,9 @@ class SpeculationEngine:
         
         self.draft_model.alloc(**self.config)
         
+        offload = self.config.pop("offload", True)
         self.target_model = AutoModelLM.from_pretrained(
-                    model_name=self.target_model_name, offload=True, batch_size=1, 
+                    model_name=self.target_model_name, offload=offload, batch_size=1, 
                     max_length=self.max_length, device=self.device,
                     dtype=self.dtype)
         
@@ -323,6 +323,13 @@ class SpeculationEngine:
         
         return self.num_nodes <= (self.max_length - self.safe_buffer)
     
+    def update_generation_args(self, **generation_args):
+        
+        self.temperature = generation_args.pop("temperature", self.temperature)
+        self.topp = generation_args.pop("topp", self.topp)
+        self.repetition_penalty = generation_args.pop("repetition_penalty", self.repetition_penalty)
+        self.topk = generation_args.pop("topk", self.topk)
+        
     @torch.inference_mode()
     def reset(self):
         self.num_nodes = 0
