@@ -38,8 +38,8 @@ class SpeculationEngine:
         self.repetition_penalty = kwargs.pop("repetition_penalty", 1.0)
         self.topk = kwargs.pop("topk", 32)
         self.num_beams = kwargs.pop("num_beams", 24)
-        self.tree_width = kwargs.pop("tree_width", 16)
-        self.tree_depth = kwargs.pop("tree_depth", 24)
+        self.tree_width = kwargs.pop("width", 16)
+        self.tree_depth = kwargs.pop("depth", 24)
         self.config = kwargs
 
     def initialize(self):
