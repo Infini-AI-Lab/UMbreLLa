@@ -1,5 +1,5 @@
 import logging
-def setup_logger(name="sequoia", level=logging.INFO):
+def setup_logger(name="infini_ai_chatbot", level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     if not logger.handlers:  # 防止重复添加 Handler
