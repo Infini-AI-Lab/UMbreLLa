@@ -15,7 +15,7 @@ import torch
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--configuration', type=str, default="../configs/chat_config.json",help='the configuration of the chatbot')
+parser.add_argument('--configuration', type=str, default="../configs/chat_config_24gb.json",help='the configuration of the chatbot')
 args = parser.parse_args()
 
 DEVICE = "cuda:0"
