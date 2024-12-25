@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 from umbrella.models.llama import LlamaAwqOffload, LlamaAwq, Llama
 import argparse
 import time
