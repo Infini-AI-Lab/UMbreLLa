@@ -13,7 +13,6 @@ logger = setup_logger()
 
 import torch
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-torch.cuda.set_per_process_memory_fraction(0.5, device=0)
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--configuration', type=str, default="../configs/chat_config.json",help='the configuration of the chatbot')
