@@ -5,4 +5,3 @@ transformers-stream-generator==0.0.5
 optimum==1.23.3
 autoawq==0.2.7.post3
 autoawq-kernels==0.0.8
-flashinfer --extra-index-url https://flashinfer.ai/whl/cu124/torch2.4/
