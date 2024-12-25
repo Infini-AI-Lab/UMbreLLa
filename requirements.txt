@@ -1,0 +1,8 @@
+torch==2.4.1
+flashinfer==0.1.6+cu124torch2.4
+transformers==4.47.0
+huggingface-hub==0.27.0
+transformers-stream-generator==0.0.5
+optimum==1.23.3
+autoawq==0.2.7.post3
+autoawq-kernels==0.0.8
