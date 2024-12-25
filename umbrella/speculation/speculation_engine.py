@@ -12,9 +12,10 @@ import time
 import flashinfer
 from ..logging_config import setup_logger
 from ..utils import TextColors
+from .base import BaseEngine
 logger = setup_logger()
 
-class SpeculationEngine:
+class SpeculationEngine(BaseEngine):
 
     def __init__(self,
         draft_model_name: str,
@@ -24,6 +25,7 @@ class SpeculationEngine:
         **kwargs
         ) -> None:
         
+        super().__init__()
         self.draft_model_name = draft_model_name
         self.target_model_name = target_model_name
         self.dtype = dtype

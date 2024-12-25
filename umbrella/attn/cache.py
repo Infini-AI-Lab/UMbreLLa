@@ -54,7 +54,8 @@ class KV_Cache:
 
         new_kv_len = storage_ids.shape[0]
         if layer_idx == 0:
-            self.kv_offset += new_kv_len
+            #self.kv_offset += new_kv_len
+            self.kv_offset = 1024
         self.k_cache[layer_idx][self.kv_offset - new_kv_len:self.kv_offset] = new_k_cache
         self.v_cache[layer_idx][self.kv_offset - new_kv_len:self.kv_offset] = new_v_cache
         return self.k_cache[layer_idx][:self.kv_offset], self.v_cache[layer_idx][:self.kv_offset]
