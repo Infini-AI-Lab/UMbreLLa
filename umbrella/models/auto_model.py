@@ -30,6 +30,7 @@ class AutoModelLM:
         "meta-llama/Meta-Llama-3-8B-Instruct": Llama,
         "meta-llama/Llama-3.2-1B-Instruct": Llama,
         "meta-llama/Llama-3.2-3B-Instruct": Llama,
+        "Felladrin/Llama-68M-Chat-v1": Llama
     }
 
     @classmethod

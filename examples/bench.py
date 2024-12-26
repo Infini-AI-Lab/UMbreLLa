@@ -11,7 +11,7 @@ os.environ['TORCH_CUDA_ARCH_LIST'] =  "8.9"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default="Felladrin/Llama-68M-Chat-v1",help='model')
-parser.add_argument('--T', type=int, default=2000, help='repeat times')
+parser.add_argument('--T', type=int, default=200, help='repeat times')
 parser.add_argument('--B', type=int, default=1, help='batch size')
 parser.add_argument('--P', type=int, default=512, help='prefix length')
 parser.add_argument('--M', type=int, default=2048, help='max length')
@@ -26,7 +26,7 @@ MODEL_NAME = args.model
 DTYPE = torch.float16
 DEVICE = "cuda:0"
 T = args.T
-WARM_UP = 3
+WARM_UP = 32
 
 llm = AutoModelLM.from_pretrained(model_name=args.model, offload=args.offload, max_length=MAX_LEN,dtype=DTYPE, device=DEVICE)
 llm.alloc()
