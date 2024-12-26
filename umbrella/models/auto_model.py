@@ -1,4 +1,4 @@
-from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload
+from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
 
 class AutoModelLM:
     """
@@ -33,8 +33,17 @@ class AutoModelLM:
         "Felladrin/Llama-68M-Chat-v1": Llama
     }
 
+    _CUDAGRAPH_MODEL_MAPPING = {
+        
+        "meta-llama/Llama-3.1-8B-Instruct": LlamaCudagraph,
+        "meta-llama/Meta-Llama-3-8B-Instruct": LlamaCudagraph,
+        "meta-llama/Llama-3.2-1B-Instruct": LlamaCudagraph,
+        "meta-llama/Llama-3.2-3B-Instruct": LlamaCudagraph,
+        "Felladrin/Llama-68M-Chat-v1": LlamaCudagraph
+    }
+    
     @classmethod
-    def from_pretrained(cls, model_name, offload=False, **kwargs):
+    def from_pretrained(cls, model_name, offload=False, cuda_graph=False, **kwargs):
         """
         根据模型类型加载预训练模型。
 
@@ -42,6 +51,12 @@ class AutoModelLM:
         :param kwargs: 额外参数
         :return: 对应的模型实例
         """
+        if cuda_graph:
+            if model_name not in cls._CUDAGRAPH_MODEL_MAPPING:
+                raise ValueError(f"Model type '{model_name}' is not supported. "
+                                f"Supported types: {list(cls._CUDAGRAPH_MODEL_MAPPING.keys())}")
+            model_class = cls._CUDAGRAPH_MODEL_MAPPING[model_name]
+            return model_class(model_name = model_name, **kwargs)
         if not offload:
             if model_name not in cls._MODEL_MAPPING:
                 raise ValueError(f"Model type '{model_name}' is not supported. "

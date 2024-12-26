@@ -13,6 +13,18 @@ def make_causal_mask(
     mask.masked_fill_(mask_cond < (mask_cond + 1).view(mask.size(-1), 1), True)
     return mask
 
+def make_causal_mask_hf(
+    input_ids_shape: torch.Size, dtype: torch.dtype, device: torch.device
+):
+    """
+    Make causal mask used for bi-directional self-attention.
+    """
+    _, tgt_len = input_ids_shape
+    mask = torch.full((tgt_len, tgt_len), torch.tensor(torch.finfo(dtype).min, device=device), device=device)
+    mask_cond = torch.arange(mask.size(-1), device=device)
+    mask.masked_fill_(mask_cond < (mask_cond + 1).view(mask.size(-1), 1), 0)
+    return mask
+
 def get_residual(p: torch.Tensor, q:torch.Tensor):
     residual = (p - q).relu_()
     residual = residual / (residual.sum(dim=-1).unsqueeze(-1))

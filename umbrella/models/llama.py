@@ -3,11 +3,12 @@ import torch
 import torch.nn.functional as F
 import gc
 import flashinfer
-from ..attn.cache import KV_Cache
+from ..attn.cache import KV_Cache, StaticKV_Cache
 from .llama_layer import LlamaLayer, LlamaAwqLayer
 from .base import LLMBase
-from .model_utils import apply_rotary_pos_emb, layer_norm
+from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
 import time
+import math
 class Llama(LLMBase):
     def __init__(self, 
         model_name: str,
@@ -416,4 +417,129 @@ class LlamaAwqOffload(LlamaOffload):
         hidden_states = residual + hidden_states
         
         return hidden_states
+
+
+class LlamaCudagraph(Llama):
+    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.float16):
+        super().__init__(model_name, batch_size, max_length, device, dtype)
     
+        self.callables = {}
+        self.mempool = None
+
+    def alloc(self, **kwargs):
+        
+        self.kv_cache = StaticKV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
+        hf_model = LlamaForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
+        self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
+        self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
+
+        self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
+        self.norm_variance_epsilon = hf_model.model.norm.variance_epsilon
+        
+        self.inv_freq = hf_model.model.rotary_emb.inv_freq.detach().to(self.device)
+        self.attention_scaling = hf_model.model.rotary_emb.attention_scaling
+        position_ids = torch.arange(0, self.max_length).unsqueeze(0).to(self.device)
+        inv_freq_expanded = self.inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1)
+        position_ids_expanded = position_ids[:, None, :].float()
+        freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
+        emb = torch.cat((freqs, freqs), dim=-1)
+        self.cos_cache = emb.cos()[0]
+        self.sin_cache = emb.sin()[0]
+        self.cos_cache = self.cos_cache * self.attention_scaling
+        self.sin_cache = self.sin_cache * self.attention_scaling
+        self.cos_cache = self.cos_cache.to(self.dtype)
+        self.sin_cache = self.sin_cache.to(self.dtype)
+        
+        self.layers :list[LlamaLayer] = []
+        
+        for idx, hf_layer in enumerate(hf_model.model.layers):
+            layer = LlamaLayer(idx)
+            layer.init_parameters(hf_layer=hf_layer)
+            layer.to(self.device)
+            self.layers.append(layer)
+            hf_model.model.layers[idx] = None
+            gc.collect()
+            
+        self.num_layers = len(self.layers)
+    
+    @torch.inference_mode()
+    def layer_compute(self, 
+            buffer: LlamaLayer,
+            layer_idx :int, 
+            hidden_states: torch.FloatTensor, 
+            position_ids: torch.LongTensor, 
+            attention_mask: torch.FloatTensor,
+            storage_ids: torch.LongTensor):
+
+        residual = hidden_states
+        bsz, q_len, _ = hidden_states.size()
+        
+        hidden_states = layer_norm(hidden_states, buffer.input_layernorm_variance_epsilon, buffer.input_layernorm_weight)
+        bsz, q_len, _ = hidden_states.size()
+        query_states = F.linear(hidden_states, buffer.wq)
+        key_states = F.linear(hidden_states, buffer.wk)
+        value_states = F.linear(hidden_states, buffer.wv)
+        query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1,2)
+        key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1,2)
+        value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1,2)
+        
+        
+        query_states, key_states = apply_rotary_pos_emb(query_states, key_states, self.cos_cache, self.sin_cache, position_ids, unsqueeze_dim=1)
+
+        key_states, value_states = self.kv_cache.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)        
+        query_states = query_states[0]
+        
+        query_states = query_states.reshape(self.num_key_value_heads, q_len * self.num_key_value_groups, self.head_dim)
+        attn_weights = torch.matmul(query_states, key_states.transpose(1, 2)) / math.sqrt(self.head_dim)
+        mask = attention_mask[None,:,:].repeat(1, self.num_key_value_groups, 1)
+        
+        attn_weights.masked_fill_(~mask, torch.finfo(attn_weights.dtype).min)
+        
+        attn_weights = torch.nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
+        hidden_states = torch.matmul(attn_weights, value_states)
+        hidden_states = hidden_states.reshape(bsz, self.num_heads, q_len, -1)
+        hidden_states = hidden_states.transpose(1, 2).contiguous()
+        hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
+        hidden_states = F.linear(hidden_states, buffer.wo)
+        hidden_states = residual + hidden_states
+        residual = hidden_states
+        hidden_states = layer_norm(hidden_states, buffer.post_attention_layernorm_variance_epsilon, buffer.post_attention_layernorm_weight)
+        up = F.linear(hidden_states, buffer.up_proj)
+        gate = F.linear(hidden_states, buffer.gate_proj)
+        gate = F.silu(gate)
+        hidden_states = gate * up
+        hidden_states = F.linear(hidden_states, buffer.down_proj)
+        hidden_states = residual + hidden_states
+        
+        return hidden_states
+    
+    
+    @torch.inference_mode()
+    def initialize_cuda_graph(self, 
+            decoding_seqlens :list[int],
+            n_warmups=12):
+        gc.collect()
+        self.mempool = torch.cuda.graphs.graph_pool_handle()
+        for decoding_seqlen in decoding_seqlens:
+            if decoding_seqlen not in self.callables:
+                self.callables[decoding_seqlen] = capture_graph(
+                    llm=self,
+                    decoding_seqlen=decoding_seqlen,
+                    mempool=self.mempool,
+                    n_warmups=n_warmups
+                )
+        self.clear()
+        
+    @torch.inference_mode()
+    def graph_inference(self,
+            input_ids: torch.LongTensor, 
+            storage_ids :torch.LongTensor,
+            position_ids = None,
+            attention_mask = None,
+            ):
+            dec_length = input_ids.shape[1]
+            if dec_length in self.callables.keys():
+                logits = self.callables[dec_length](input_ids, storage_ids, position_ids, attention_mask)
+            else:
+                logits = self.inference(input_ids, position_ids, attention_mask, storage_ids)
+            return logits
