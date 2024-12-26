@@ -27,7 +27,7 @@ MODEL_NAME = args.model
 DTYPE = torch.float16
 DEVICE = "cuda:0"
 T = args.T
-WARM_UP = 32
+WARM_UP = 3
 
 llm = AutoModelLM.from_pretrained(model_name=args.model, offload=args.offload, cuda_graph=args.cuda_graph, max_length=MAX_LEN,dtype=DTYPE, device=DEVICE)
 llm.alloc()
