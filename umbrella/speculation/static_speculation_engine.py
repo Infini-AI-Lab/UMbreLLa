@@ -141,7 +141,7 @@ class StaticSpeculationEngine(BaseEngine):
         prefix_len = input_ids.shape[1]
         self.num_nodes += prefix_len
         self.num_nodes_this_iter = self.num_nodes + self.tree_size
-        self.attn_mask_this_iter = self.attn_mask[self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter, self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter].contiguous()
+        self.attn_mask_this_iter = self.attn_mask[self.max_length - self.num_nodes_this_iter: self.max_length, self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter].contiguous()
         self.num_draft_tokens_this_iter = self.num_nodes
         
         self.tokens[:,:prefix_len].copy_(input_ids)
@@ -174,7 +174,7 @@ class StaticSpeculationEngine(BaseEngine):
         num_last_iter_nodes = self.num_nodes
         self.num_nodes += (append_len + 1)
         self.num_nodes_this_iter = self.num_nodes + self.tree_size
-        self.attn_mask_this_iter = self.attn_mask[self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter, self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter].contiguous()
+        self.attn_mask_this_iter = self.attn_mask[self.max_length - self.num_nodes_this_iter: self.max_length, self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter].contiguous()
         self.num_draft_tokens_this_iter = self.num_nodes
         self.position_ids[:,:self.num_nodes] = torch.arange(self.num_nodes).unsqueeze(0)
         self.position_ids[:,self.num_nodes:self.num_nodes+self.tree_size] = self.num_nodes + self.depth

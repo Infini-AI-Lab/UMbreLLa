@@ -7,8 +7,6 @@ from ..attn.cache import KV_Cache, StaticKV_Cache
 from .llama_layer import LlamaLayer, LlamaAwqLayer, LlamaPackedLayer
 from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
-import time
-import math
 from tqdm import tqdm
 class Llama(LLMBase):
     def __init__(self, 
@@ -97,16 +95,9 @@ class Llama(LLMBase):
         
         
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, self.cos_cache, self.sin_cache, position_ids)
-        key_states, value_states = self.kv_cache.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)        
-        hidden_states = flashinfer.single_prefill_with_kv_cache(
-                q = query_states[0],
-                k = key_states,
-                v = value_states,
-                kv_layout="NHD",
-                custom_mask=attention_mask[:,:key_states.shape[0]],
-                allow_fp16_qk_reduction=True
-            )
-        
+        hidden_states = self.kv_cache.compute_attention(
+            query_states, key_states, value_states, layer_idx, storage_ids, attention_mask
+        )
         hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
         
         hidden_states = F.linear(hidden_states, buffer.wo)
@@ -292,17 +283,10 @@ class LlamaAwq(Llama):
         
         
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, self.cos_cache, self.sin_cache, position_ids)
-        key_states, value_states = self.kv_cache.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)     
-           
-        hidden_states = flashinfer.single_prefill_with_kv_cache(
-                q = query_states[0],
-                k = key_states,
-                v = value_states,
-                kv_layout="NHD",
-                custom_mask=attention_mask[:,:key_states.shape[0]],
-                allow_fp16_qk_reduction=True
-            )
-        
+
+        hidden_states = self.kv_cache.compute_attention(
+            query_states, key_states, value_states, layer_idx, storage_ids, attention_mask
+        )
         hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
         
         hidden_states = buffer.wo.apply(hidden_states)
@@ -406,16 +390,9 @@ class LlamaAwqOffload(LlamaOffload):
         
         
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, self.cos_cache, self.sin_cache, position_ids)
-        key_states, value_states = self.kv_cache.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)     
-        hidden_states = flashinfer.single_prefill_with_kv_cache(
-                q = query_states[0],
-                k = key_states,
-                v = value_states,
-                kv_layout="NHD",
-                custom_mask=attention_mask[:,:key_states.shape[0]],
-                allow_fp16_qk_reduction=True
-            )
-        
+        hidden_states = self.kv_cache.compute_attention(
+            query_states, key_states, value_states, layer_idx, storage_ids, attention_mask
+        )
         hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
         
         hidden_states = buffer.wo.apply(hidden_states)
@@ -505,21 +482,11 @@ class LlamaCudagraph(Llama):
         value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1,2)
         
         
-        query_states, key_states = apply_rotary_pos_emb(query_states, key_states, self.cos_cache, self.sin_cache, position_ids, unsqueeze_dim=1)
-
-        key_states, value_states = self.kv_cache.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)        
-        query_states = query_states[0]
+        query_states, key_states = apply_rotary_pos_emb(query_states, key_states, self.cos_cache, self.sin_cache, position_ids, unsqueeze_dim=1)       
+        hidden_states = self.kv_cache.compute_attention(
+            query_states, key_states, value_states, layer_idx, storage_ids, attention_mask
+        )
         
-        query_states = query_states.reshape(self.num_key_value_heads, q_len * self.num_key_value_groups, self.head_dim)
-        attn_weights = torch.matmul(query_states, key_states.transpose(1, 2)) / math.sqrt(self.head_dim)
-        mask = attention_mask[None,:,:].repeat(1, self.num_key_value_groups, 1)
-        
-        attn_weights.masked_fill_(~mask, torch.finfo(attn_weights.dtype).min)
-        
-        attn_weights = torch.nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
-        hidden_states = torch.matmul(attn_weights, value_states)
-        hidden_states = hidden_states.reshape(bsz, self.num_heads, q_len, -1)
-        hidden_states = hidden_states.transpose(1, 2).contiguous()
         hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
         hidden_states = F.linear(hidden_states, buffer.wo)
         hidden_states = residual + hidden_states

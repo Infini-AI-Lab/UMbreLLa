@@ -8,7 +8,7 @@ from umbrella.templates import Prompts, SysPrompts
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default="hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4",help='model')
-parser.add_argument('--draft_model', type=str, default="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4",help='draft model')
+parser.add_argument('--draft_model', type=str, default="meta-llama/Llama-3.2-1B-Instruct",help='draft model')
 parser.add_argument('--template', type=str, default="meta-llama3",help='prompt template')
 parser.add_argument('--G', type=int, default=512, help='generation length')
 parser.add_argument('--offload', action='store_true', help="offload the model")
@@ -37,7 +37,7 @@ engine = DynamicSpeculationEngine(
     device=DEVICE,
     max_length=2048,
     cuda_graph=True,
-    growmap_path="../umbrella/trees/2x4-tree.json"
+    growmap_path="../umbrella/trees/sequoia_tree-3x4.json"
 )
 
 
