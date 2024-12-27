@@ -68,7 +68,7 @@ class StaticSpeculationEngine(BaseEngine):
         self.node_in_path = self.tree_mask.int().sum(dim=-1)
         
         self.tree_size = self.growmap["size"]
-        logger.info(TextColors.colorize("Tree Size {} | Tree Depth {}".format(self.tree_size - 1, self.tree_depth), "magenta"))
+        logger.info(TextColors.colorize("Tree Size {} | Tree Depth {}".format(self.tree_size - 1, self.tree_depth - 1), "magenta"))
         
         self.parents = torch.zeros(self.tree_size,dtype=torch.int32, device=self.device)
         for v, successor in enumerate(self.Successors):
