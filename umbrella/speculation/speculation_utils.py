@@ -45,7 +45,6 @@ def sampling_with_replacement(
         num_samples: int,
         temperature :float):
 
-        #sampling_q = softmax(sampling_logits / temperature, dim=-1)
         sampling_q = softmax(sampling_logits / temperature, dim=-1)    
         position = sampling_q.multinomial(num_samples=num_samples, replacement=False).flatten()
         return position
@@ -178,6 +177,7 @@ def cuda_graph_for_sampling_without_replacement(
     
     return run
 
+@torch.inference_mode()
 def cuda_graph_for_sampling_argmax(
                 device="cuda:0", dtype=torch.float16, 
                 dim=32000,

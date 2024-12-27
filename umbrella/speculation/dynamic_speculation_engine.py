@@ -15,7 +15,7 @@ from ..utils import TextColors
 from .base import BaseEngine
 logger = setup_logger()
 
-class SpeculationEngine(BaseEngine):
+class DynamicSpeculationEngine(BaseEngine):
 
     def __init__(self,
         draft_model_name: str,
@@ -74,16 +74,15 @@ class SpeculationEngine(BaseEngine):
         
         self.draft_model.alloc(**self.config)
         
-        offload = self.config.pop("offload", True)
         self.target_model = AutoModelLM.from_pretrained(
-                    model_name=self.target_model_name, offload=offload, batch_size=1, 
+                    model_name=self.target_model_name, offload=True, batch_size=1, 
                     max_length=self.max_length, device=self.device,
                     dtype=self.dtype)
         
         self.target_model.alloc(**self.config)
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.target_model_name)
-        self.vocab_size = self.tokenizer.vocab_size
+        self.vocab_size = self.target_model.config.vocab_size
         self.generation_config = GenerationConfig.from_pretrained(self.target_model_name)
         self.num_nodes = 0
         self.eos_tokens = self.generation_config.eos_token_id if (isinstance(self.generation_config.eos_token_id, list)) else [self.generation_config.eos_token_id]

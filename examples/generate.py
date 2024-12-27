@@ -6,18 +6,19 @@ from umbrella.models.auto_model import AutoModelLM
 import torch
 from umbrella.templates import Prompts, SysPrompts
 from transformers import AutoTokenizer
-from umbrella.speculation.speculation_utils import make_causal_mask_hf, make_causal_mask
+from umbrella.speculation.speculation_utils import make_causal_mask
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default="meta-llama/Llama-3.2-1B-Instruct",help='model')
 parser.add_argument('--template', type=str, default="meta-llama3",help='prompt template')
+parser.add_argument('--G', type=int, default=64, help='generation length')
 parser.add_argument('--offload', action='store_true', help="offload the model")
 parser.add_argument('--cuda_graph', action='store_true', help="whether use cuda graph")
 args = parser.parse_args()
 DEVICE = "cuda:0"
 DTYPE = torch.float16
 MAX_LEN = 2048
-GEN_LEN = 256
+GEN_LEN = args.G
 template = args.template
 system_prompt = SysPrompts[template]
 user_prompt = Prompts[template]

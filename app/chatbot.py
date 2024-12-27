@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from umbrella.speculation.speculation_engine import SpeculationEngine
+from umbrella.speculation.auto_engine import AutoEngine
 from umbrella.logging_config import setup_logger
 from umbrella.utils import TextColors
 from umbrella.templates import Prompts, SysPrompts
@@ -17,21 +17,12 @@ with open(args.configuration, "r") as f:
     config = json.load(f)
 
 GEN_LEN = config.pop("generation_length", 256)
-MAX_LEN = config.pop("max_length", 8192)
 MAX_TURNS = config.pop("max_turns", 16)
-draft_model_name = config.pop("draft_model", "meta-llama/Llama-3.2-1B-Instruct")
-target_model_name = config.pop("model", "hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4")
 template = config.pop("template", "meta-llama3")
 system_prompt = SysPrompts[template]
 user_prompt = Prompts[template]
 
-engine = SpeculationEngine(
-    draft_model_name=draft_model_name,
-    target_model_name=target_model_name,
-    device=DEVICE,
-    max_length=MAX_LEN,
-    **config
-)
+engine = AutoEngine.from_config(DEVICE, **config)
 engine.initialize()
 
 for i in range(MAX_TURNS):

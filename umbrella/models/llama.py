@@ -9,7 +9,7 @@ from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
 import time
 import math
-
+from tqdm import tqdm
 class Llama(LLMBase):
     def __init__(self, 
         model_name: str,
@@ -39,7 +39,10 @@ class Llama(LLMBase):
         self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
         hf_model = LlamaForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
-        self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
+        if self.config.tie_word_embeddings:
+            self.lm_head = self.embed_tokens
+        else:
+            self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
 
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
         self.norm_variance_epsilon = hf_model.model.norm.variance_epsilon
@@ -160,7 +163,10 @@ class LlamaOffload(Llama):
         self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
         hf_model = LlamaForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
-        self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
+        if self.config.tie_word_embeddings:
+            self.lm_head = self.embed_tokens
+        else:
+            self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
 
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
         self.norm_variance_epsilon = hf_model.model.norm.variance_epsilon
@@ -181,7 +187,7 @@ class LlamaOffload(Llama):
         
         self.layers :list[LlamaLayer] = []
         
-        for idx, hf_layer in enumerate(hf_model.model.layers):
+        for idx, hf_layer in tqdm(enumerate(hf_model.model.layers), desc="initial offloaded model"):
             layer = LlamaLayer(idx)
             layer.init_parameters(hf_layer=hf_layer)
             if idx < self.num_cache_layers:
@@ -231,7 +237,10 @@ class LlamaAwq(Llama):
         
         hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
-        self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
+        if self.config.tie_word_embeddings:
+            self.lm_head = self.embed_tokens
+        else:
+            self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
         self.norm_variance_epsilon = hf_model.model.norm.variance_epsilon
         self.inv_freq = hf_model.model.rotary_emb.inv_freq.detach().to(self.device)
@@ -337,7 +346,10 @@ class LlamaAwqOffload(LlamaOffload):
         
         hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
-        self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
+        if self.config.tie_word_embeddings:
+            self.lm_head = self.embed_tokens
+        else:
+            self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
         self.norm_variance_epsilon = hf_model.model.norm.variance_epsilon
         self.inv_freq = hf_model.model.rotary_emb.inv_freq.detach().to(self.device)
@@ -355,7 +367,7 @@ class LlamaAwqOffload(LlamaOffload):
         self.sin_cache = self.sin_cache.to(self.dtype)
         self.layers :list[LlamaAwqLayer] = []
         
-        for idx, hf_layer in enumerate(hf_model.model.layers):
+        for idx, hf_layer in tqdm(enumerate(hf_model.model.layers), desc="initial offloaded model"):
             layer = LlamaAwqLayer(idx)
             layer.init_parameters(hf_layer=hf_layer)
             if idx < self.num_cache_layers:
@@ -429,10 +441,14 @@ class LlamaCudagraph(Llama):
 
     def alloc(self, **kwargs):
         
+        exit_layer = kwargs.pop("exit_layer", -1)
         self.kv_cache = StaticKV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
         hf_model = LlamaForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
-        self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
+        if self.config.tie_word_embeddings:
+            self.lm_head = self.embed_tokens
+        else:
+            self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
 
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
         self.norm_variance_epsilon = hf_model.model.norm.variance_epsilon
@@ -454,6 +470,8 @@ class LlamaCudagraph(Llama):
         self.layers :list[LlamaPackedLayer] = []
         
         for idx, hf_layer in enumerate(hf_model.model.layers):
+            if exit_layer > 0 and idx >= exit_layer:
+                break
             layer = LlamaPackedLayer(idx)
             layer.init_parameters(hf_layer=hf_layer)
             layer.to(self.device)

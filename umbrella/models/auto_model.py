@@ -30,7 +30,8 @@ class AutoModelLM:
         "meta-llama/Meta-Llama-3-8B-Instruct": Llama,
         "meta-llama/Llama-3.2-1B-Instruct": Llama,
         "meta-llama/Llama-3.2-3B-Instruct": Llama,
-        "Felladrin/Llama-68M-Chat-v1": Llama
+        "Felladrin/Llama-68M-Chat-v1": Llama,
+        "facebook/layerskip-llama3.2-1B": Llama,
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
@@ -39,7 +40,8 @@ class AutoModelLM:
         "meta-llama/Meta-Llama-3-8B-Instruct": LlamaCudagraph,
         "meta-llama/Llama-3.2-1B-Instruct": LlamaCudagraph,
         "meta-llama/Llama-3.2-3B-Instruct": LlamaCudagraph,
-        "Felladrin/Llama-68M-Chat-v1": LlamaCudagraph
+        "Felladrin/Llama-68M-Chat-v1": LlamaCudagraph,
+        "facebook/layerskip-llama3.2-1B": LlamaCudagraph,
     }
     
     @classmethod

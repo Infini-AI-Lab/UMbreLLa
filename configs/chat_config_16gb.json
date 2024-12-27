@@ -13,5 +13,6 @@
     "width": 16,
     "num_beams": 24,
     "depth": 24,
+    "engine": "dynamic",
     "template": "meta-llama3"
 }
