@@ -106,8 +106,7 @@ def generate_sequoia_tree(width: int, depth: int, acc: list[float] = None, json_
         score.append(selected_candidate_score)
         offset = 0 if i == 0 else (i - 1) * width + 1
         selected_candidate_parents = selected_candidate_indices // num_beams + offset
-        
-        for child, parent in enumerate(selected_candidate_parents.tolist()):
+        for child, parent in enumerate(sorted(selected_candidate_parents.tolist())):
             Successor[parent].append(child + i * width + 1)
             branches[i][parent - offset] += 1
     
@@ -129,4 +128,4 @@ def generate_sequoia_tree(width: int, depth: int, acc: list[float] = None, json_
 
     return result
             
-    
+generate_sequoia_tree(width=5, depth=6, acc=[0.65, 0.2, 0.06, 0.03, 0.02])

@@ -7,7 +7,8 @@ find_first_element_position,
 apply_repetition_penalty, 
 apply_topk,
 is_sentence_complete_regex,
-cuda_graph_for_sampling_argmax
+cuda_graph_for_sampling_argmax,
+cuda_graph_for_sampling_argmax_gather
 )
 import time
 import flashinfer
@@ -110,11 +111,6 @@ class StaticSpeculationEngine(BaseEngine):
         self.sampling_callables = {}
         self.sample_gather_indices = {}
 
-        for i in range(self.tree_depth - 1):
-            idx_len = len(idx_lists[i])
-            num_samples = max(self.branch_lists[i])
-            self.sampling_callables[i] = cuda_graph_for_sampling_argmax(device=self.device, 
-            idx_len=idx_len, num_samples=num_samples, dtype=torch.float32, dim=self.vocab_size)
         
         for i in range(self.tree_depth - 1):
             ith_gather_list = []
@@ -125,6 +121,14 @@ class StaticSpeculationEngine(BaseEngine):
                 ith_gather_list.append(branch_index)
             ith_gather_list = torch.cat(ith_gather_list)
             self.sample_gather_indices[i] = ith_gather_list
+        
+        for i in range(self.tree_depth - 1):
+            idx_len = len(idx_lists[i])
+            num_samples = max(self.branch_lists[i])
+            self.sampling_callables[i] = cuda_graph_for_sampling_argmax_gather(device=self.device, 
+            idx_len=idx_len, num_samples=num_samples, dtype=torch.float32, dim=self.vocab_size, index_len=len(self.sample_gather_indices[i]))
+        
+        self.uniform_samples = torch.rand(3, self.tree_size).to(self.device)
         
     def prefill(self, text:str):
         input_ids = self.tokenizer.encode(text=text, return_tensors="pt").to(device=self.device)
@@ -266,9 +270,8 @@ class StaticSpeculationEngine(BaseEngine):
     
             self.num_draft_tokens_this_iter += dec_len
             if step < self.tree_depth - 1:
-                new_tokens_set = self.sampling_callables[step](draft_logits)
-                self.tokens[0,self.num_draft_tokens_this_iter: self.num_draft_tokens_this_iter + total_branch] = new_tokens_set[self.sample_gather_indices[step]]
-    
+                new_tokens_set = self.sampling_callables[step](draft_logits, self.sample_gather_indices[step])
+                self.tokens[0,self.num_draft_tokens_this_iter: self.num_draft_tokens_this_iter + total_branch] = new_tokens_set
     @torch.inference_mode()
     def verify(self):
         
@@ -297,11 +300,8 @@ class StaticSpeculationEngine(BaseEngine):
             sampled_tokens = target_logits.argmax(dim=-1)
         
         else:
-            #stochastic decoding
-            proba = torch.softmax(target_logits/self.temperature, dim=-1)
-            proba = flashinfer.sampling.top_k_renorm_prob(proba, self.topk)
-            proba = flashinfer.sampling.top_p_renorm_prob(proba, self.topp)
-            sampled_tokens = torch.multinomial(proba, num_samples=1).squeeze(-1)
+            sampled_tokens, _ = flashinfer.sampling.top_k_top_p_sampling_from_logits(target_logits/self.temperature, self.uniform_samples, self.topk, self.topp)
+            
             
         speculated_tokens = self.tokens[0, self.num_nodes:self.num_draft_tokens_this_iter]
         ref_tokens = sampled_tokens[self.parents]
@@ -335,7 +335,7 @@ class StaticSpeculationEngine(BaseEngine):
         self.num_draft_tokens_this_iter = self.num_nodes
         
         self.num_nodes_this_iter = self.num_nodes + self.tree_size
-        self.attn_mask_this_iter = self.attn_mask[self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter, self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter].contiguous()
+        self.attn_mask_this_iter = self.attn_mask[self.max_length - self.num_nodes_this_iter: self.max_length, self.max_length - self.num_nodes_this_iter: 2 * self.max_length - self.num_nodes_this_iter].contiguous()
         
         if accept_length > 0:
             self.position_ids[:,num_last_iter_nodes:self.num_nodes] = self.position_ids[:,accept_path]

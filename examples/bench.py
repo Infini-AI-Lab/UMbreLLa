@@ -8,7 +8,7 @@ import os
 from umbrella.speculation.speculation_utils import make_causal_mask
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, default="meta-llama/Llama-3.2-1B-Instruct",help='model')
+parser.add_argument('--model', type=str, default="meta-llama/Llama-3.1-8B-Instruct",help='model')
 parser.add_argument('--T', type=int, default=200, help='repeat times')
 parser.add_argument('--P', type=int, default=512, help='prefix length')
 parser.add_argument('--M', type=int, default=2048, help='max length')

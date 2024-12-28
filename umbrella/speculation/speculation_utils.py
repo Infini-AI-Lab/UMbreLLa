@@ -48,10 +48,17 @@ def sampling_with_replacement(
         sampling_q = softmax(sampling_logits / temperature, dim=-1)    
         position = sampling_q.multinomial(num_samples=num_samples, replacement=False).flatten()
         return position
+
 def sampling_argmax(
         sampling_logits: torch.Tensor, 
         num_samples: int):
         return sampling_logits.topk(k=num_samples).indices.flatten()
+
+def sampling_argmax_gather(
+        sampling_logits: torch.Tensor, 
+        num_samples: int,
+        indices: torch.LongTensor):
+        return sampling_logits.topk(k=num_samples).indices.flatten().index_select(dim=0, index=indices)
 
 def expand_kv(kv_cache, k):
     kv_shape = kv_cache[0][0].shape
@@ -211,6 +218,43 @@ def cuda_graph_for_sampling_argmax(
     
     return run
 
+
+@torch.inference_mode()
+def cuda_graph_for_sampling_argmax_gather(
+                device="cuda:0", dtype=torch.float16, 
+                dim=32000,
+                n_warmups=3, mempool=None,
+                idx_len = 8, num_samples = 16, index_len = 4):
+    
+    static_sampling_logits = torch.full((idx_len, dim), 1, dtype=dtype, device=device)
+    static_indices = torch.arange(index_len, device=device)
+
+    s = torch.cuda.Stream()
+    s.wait_stream(torch.cuda.current_stream())
+    with torch.cuda.stream(s):
+        for _ in range(n_warmups):
+            static_position = sampling_argmax_gather(
+                 static_sampling_logits,
+                 num_samples,
+                 static_indices
+            )
+        s.synchronize()
+    torch.cuda.current_stream().wait_stream(s)
+
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph, pool=mempool):
+        static_position = sampling_argmax_gather(
+                 static_sampling_logits,
+                 num_samples,
+                 static_indices
+            )
+    def run(draft_logits, indices):
+        static_sampling_logits.copy_(draft_logits)
+        static_indices.copy_(indices)
+        graph.replay()
+        return static_position.clone()
+    
+    return run
 
 def cuda_graph_for_sampling_with_replacement(
                 device="cuda:0", dtype=torch.float16, 
