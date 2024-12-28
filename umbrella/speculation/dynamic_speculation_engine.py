@@ -340,4 +340,41 @@ class DynamicSpeculationEngine(BaseEngine):
         self.position_ids.zero_()
         self.draft_model.clear()
         self.target_model.clear()
+    
+    @torch.inference_mode()
+    def generate(self, **api_args):
+        
+        context = api_args.get("context", None)
+        max_new_tokens = api_args.get("max_new_tokens", 128)
+        if context is None or len(context) == 0 or max_new_tokens == 0:
+            return api_args
+        
+        self.update_generation_args(**api_args)
+        self.prefill(context)
+        
+        torch.cuda.synchronize()
+        t1 = time.time()
+        large_model_step = 0
+        decode = True
+        start = self.num_nodes
+        
+        while decode:
+            self.build_tree()
+            decode = self.verify()
+            large_model_step = large_model_step + 1
+        torch.cuda.synchronize()
+        t2 = time.time()
+        dec_len = (self.num_nodes - start + 1)
+        generated_text = self.tokenizer.decode(
+        self.tokens[0,start:self.num_nodes+1].tolist(), 
+        skip_special_tokens=True,
+        clean_up_tokenization_spaces=True)
+        
+        api_args["generated_text"] = generated_text
+        api_args["avg_accept_tokens"] = dec_len/large_model_step
+        api_args["time_per_output_token"] = 1000 * (t2-t1)/dec_len
+        self.reset()
+        return api_args
+        
+        
         

@@ -50,3 +50,8 @@ class BaseEngine(ABC):
     @abstractmethod
     def reset(self):
         raise NotImplementedError
+    
+    @abstractmethod
+    def generate(self, **api_args):
+        raise NotImplementedError
+    
