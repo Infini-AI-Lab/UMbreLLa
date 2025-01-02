@@ -181,7 +181,7 @@ class DynamicSpeculationEngine(BaseEngine):
                     self.tokenizer.decode(
                     generated_ids,
                     skip_special_tokens=True,
-                    clean_up_tokenization_spaces=True,
+                    clean_up_tokenization_spaces=False,
                     spaces_between_special_tokens=False,
                 )
                 .strip()

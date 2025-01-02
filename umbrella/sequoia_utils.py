@@ -3,6 +3,7 @@ import json
 from collections import deque
 import matplotlib.pyplot as plt
 import networkx as nx
+from .models.auto_model import AutoModelLM
 DEFAULT_ACC = [0.65, 0.2, 0.1, 0.05]
 
 def save_pt_to_json(pt_file, json_file):
@@ -128,4 +129,7 @@ def generate_sequoia_tree(width: int, depth: int, acc: list[float] = None, json_
 
     return result
             
-generate_sequoia_tree(width=5, depth=6, acc=[0.65, 0.2, 0.06, 0.03, 0.02])
+
+def measure_acceptance_rate(draft_model: str, target_model: str, dataset, 
+    temperature=0.6, topp=0.9, repetition_penalty=1.05):
+    pass

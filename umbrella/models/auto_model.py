@@ -43,6 +43,9 @@ class AutoModelLM:
         "Felladrin/Llama-68M-Chat-v1": LlamaCudagraph,
         "facebook/layerskip-llama3.2-1B": LlamaCudagraph,
         "Zhuominc/Llama-3-330M": LlamaCudagraph,
+        "Zhuominc/Coder-670M": LlamaCudagraph,
+        "Zhuominc/Coder-400M": LlamaCudagraph,
+        "Zhuominc/Coder-400M-IT": LlamaCudagraph
     }
     
     @classmethod
