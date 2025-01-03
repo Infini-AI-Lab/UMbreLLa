@@ -1,8 +1,9 @@
 
 Prompts = {
-    'meta-llama3': """<|start_header_id|>user<|end_header_id|>
+    'meta-llama3': """\n<|start_header_id|>user<|end_header_id|>
 
-{}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+{}<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
 
 """,
     'llama3-code':"""<|start_header_id|>user<|end_header_id|>

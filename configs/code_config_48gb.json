@@ -1,6 +1,6 @@
 {
     "model": "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4",
-    "draft_model": "meta-llama/Llama-3.2-1B-Instruct",
+    "draft_model": "Zhuominc/FastCode-500M",
     "offload": false,
     "cuda_graph": true,
     "max_length": 2048,
@@ -9,10 +9,10 @@
     "growmap_path": "../umbrella/trees/sequoia_tree-3x4.json",
     "max_turns": 16,
     "topk": 32,
-    "temperature": 0.6,
+    "temperature": 0,
     "topp": 0.9,
-    "repetition_penalty": 1.05,
+    "repetition_penalty": 1.0,
     "exit_layer":16,
     "engine": "static",
-    "template": "meta-llama3"
+    "template": "llama3-code"
 }

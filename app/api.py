@@ -5,6 +5,7 @@ from umbrella.api.client import APIClient
 from umbrella.templates import Prompts, SysPrompts
 from umbrella.logging_config import setup_logger
 from umbrella.utils import TextColors
+from transformers import AutoTokenizer
 import json
 import argparse
 parser = argparse.ArgumentParser()
@@ -36,20 +37,34 @@ def client_program(port, config):
     text2 = user_prompt.format(text2)
     text2 = system_prompt + text2
     
+    model_name = config.get("model")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    input_ids1 = tokenizer.encode(text1)
+    input_ids2 = tokenizer.encode(text2)
+    
     
     
     client = APIClient(port=port)
     client.run()
     
-    input1 = {"context": text1, "max_new_tokens": 512}
-    input2 = {"context": text2, "max_new_tokens": 512}
+    input1 = {"context": text1, "max_new_tokens": 512, "temperature": 0.0}
+    input2 = {"context": text2, "max_new_tokens": 512, "temperature": 0.0}
+    
+    input3 = {"input_ids": input_ids1, "max_new_tokens": 512, "temperature": 0.0}
+    input4 = {"input_ids": input_ids2, "max_new_tokens": 512, "temperature": 0.0}
     
     output1 = client.get_output(**input1)
-    
     logger.info(TextColors.colorize(output1['generated_text'], "cyan"))
 
     output2 = client.get_output(**input2)
     logger.info(TextColors.colorize(output2['generated_text'], "cyan"))
+    
+    
+    output3 = client.get_output(**input3)
+    logger.info(TextColors.colorize(output3['generated_text'], "cyan"))
+    
+    output4 = client.get_output(**input4)
+    logger.info(TextColors.colorize(output4['generated_text'], "cyan"))
     
     client.close()
 
