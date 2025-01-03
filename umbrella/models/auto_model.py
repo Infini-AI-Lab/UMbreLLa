@@ -32,6 +32,11 @@ class AutoModelLM:
         "meta-llama/Llama-3.2-3B-Instruct": Llama,
         "Felladrin/Llama-68M-Chat-v1": Llama,
         "facebook/layerskip-llama3.2-1B": Llama,
+        "Zhuominc/Llama-3-330M": Llama,
+        "Zhuominc/Coder-670M": Llama,
+        "Zhuominc/Coder-400M": Llama,
+        "Zhuominc/Coder-400M-IT": Llama,
+        "Zhuominc/FastCode-500M": Llama
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
@@ -45,7 +50,8 @@ class AutoModelLM:
         "Zhuominc/Llama-3-330M": LlamaCudagraph,
         "Zhuominc/Coder-670M": LlamaCudagraph,
         "Zhuominc/Coder-400M": LlamaCudagraph,
-        "Zhuominc/Coder-400M-IT": LlamaCudagraph
+        "Zhuominc/Coder-400M-IT": LlamaCudagraph,
+        "Zhuominc/FastCode-500M": LlamaCudagraph
     }
     
     @classmethod

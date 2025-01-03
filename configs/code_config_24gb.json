@@ -14,5 +14,5 @@
     "repetition_penalty": 1.0,
     "exit_layer":16,
     "engine": "static",
-    "template": "meta-llama3"
+    "template": "llama3-code"
 }

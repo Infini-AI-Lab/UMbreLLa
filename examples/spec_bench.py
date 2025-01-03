@@ -5,8 +5,6 @@ import os.path as osp
 import ssl
 import urllib.request
 import os
-from umbrella.speculation.dynamic_speculation_engine import DynamicSpeculationEngine
-from umbrella.speculation.static_speculation_engine import StaticSpeculationEngine
 from umbrella.speculation.auto_engine import AutoEngine
 from umbrella.logging_config import setup_logger
 from umbrella.utils import TextColors
@@ -97,7 +95,6 @@ for prompt in prompts:
     category_total_decode_tokens[prompt['category']] = 0
 
 for idx, prompt in enumerate(prompts):
-    if prompt['category'] != 'coding': continue
     print(TextColors.colorize("Question ID: {}".format(prompt["question_id"]), 'white'))
     inputs = user_prompt.format(prompt["turns"][0])
     inputs = system_prompt + inputs
@@ -128,12 +125,12 @@ for idx, prompt in enumerate(prompts):
         
     engine.reset()
 
-# for category in category_large_model_steps.keys():
+for category in category_large_model_steps.keys():
 
-#         logger.info(TextColors.colorize("{} | Avg Accept Tokens {:.2f} | TPOT {:.2f} ms ".format(
-#         category,
-#         category_total_decode_tokens[category]/category_large_model_steps[category], 
-#         1000 * category_total_time[category]/category_total_decode_tokens[category]
-#         ), "cyan"))
+        logger.info(TextColors.colorize("{} | Avg Accept Tokens {:.2f} | TPOT {:.2f} ms ".format(
+        category,
+        category_total_decode_tokens[category]/category_large_model_steps[category], 
+        1000 * category_total_time[category]/category_total_decode_tokens[category]
+        ), "cyan"))
         
 logger.info(TextColors.colorize("Summary | Avg Accept Tokens {:.2f} | TPOT {:.2f} ms ".format(total_decode_tokens/large_model_steps, 1000 * total_time/total_decode_tokens), "cyan"))
