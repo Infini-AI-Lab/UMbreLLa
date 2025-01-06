@@ -33,7 +33,7 @@ class DynamicSpeculationEngine(BaseEngine):
         
         self.max_length = kwargs.pop("max_length", 8192)
         self.stop_distance = kwargs.pop("stop_distance", 32)
-        self.safe_buffer = kwargs.pop("safe_buffer", 512)
+        self.safe_buffer = kwargs.pop("safe_buffer", 64)
         self.temperature = kwargs.pop("temperature", 0.0)
         self.topp = kwargs.pop("topp", 0.9)
         self.repetition_penalty = kwargs.pop("repetition_penalty", 1.0)
@@ -89,17 +89,19 @@ class DynamicSpeculationEngine(BaseEngine):
         
     def prefill(self, text:str):
         input_ids = self.tokenizer.encode(text=text, return_tensors="pt").to(device=self.device)
-        self._prefill(input_ids=input_ids)
+        return self._prefill(input_ids=input_ids)
     
     def append(self, text:str):
         input_ids = self.tokenizer.encode(text=text, return_tensors="pt").to(device=self.device)
         input_ids = input_ids[:,1:]
-        self._append(input_ids)
+        return self._append(input_ids)
         
     @torch.inference_mode()
     def _prefill(self, input_ids:torch.LongTensor):
         
         prefix_len = input_ids.shape[1]
+        if prefix_len >= self.max_length - 2 * self.safe_buffer:
+            return False
         self.num_nodes += prefix_len
         self.num_nodes_this_iter = self.num_nodes + self.tree_size
         self.attn_mask_this_iter = self.attn_mask[self.max_length - self.num_nodes_this_iter: self.max_length, self.max_length - self.num_nodes_this_iter: self.max_length].contiguous()
@@ -129,10 +131,13 @@ class DynamicSpeculationEngine(BaseEngine):
         next_token = target_logits[-1:].argmax(dim=-1, keepdim=True)
         
         self.tokens[:,self.num_nodes:self.num_nodes+1] = next_token
-    
+
+        return True
     @torch.inference_mode()
     def _append(self, input_ids:torch.LongTensor):
         append_len = input_ids.shape[1]
+        if append_len + self.num_nodes >= self.max_length - 2 * self.safe_buffer:
+            return False
         self.tokens[:,self.num_nodes+1:self.num_nodes+1+append_len].copy_(input_ids)
         num_last_iter_nodes = self.num_nodes
         self.num_nodes += (append_len + 1)
@@ -159,7 +164,8 @@ class DynamicSpeculationEngine(BaseEngine):
         next_token = target_logits[-1:].argmax(dim=-1, keepdim=True)
         
         self.tokens[:,self.num_nodes:self.num_nodes+1] = next_token
-    
+        
+        return True
     @torch.inference_mode()
     def speculative_decoding(self, max_new_tokens=128):
         max_new_tokens = max(max_new_tokens, self.stop_distance)
@@ -170,7 +176,7 @@ class DynamicSpeculationEngine(BaseEngine):
         start = self.num_nodes
         generated_ids = []
         pos = 0
-        while decode:
+        while decode and self.validate_status():
             begin_pos = self.num_nodes
             self.build_tree()
             decode = self.verify()
@@ -356,7 +362,7 @@ class DynamicSpeculationEngine(BaseEngine):
                 api_args["avg_accept_tokens"] = 0
                 api_args["time_per_output_token"] = 0
                 return api_args
-            self.prefill(context)
+            success = self.prefill(context)
         
         else:
             if len(input_ids) == 0 or max_new_tokens == 0:
@@ -366,15 +372,23 @@ class DynamicSpeculationEngine(BaseEngine):
                 api_args["time_per_output_token"] = 0
                 return api_args
             input_ids = torch.Tensor(input_ids).long().unsqueeze(0).to(self.device)
-            self._prefill(input_ids=input_ids)
+            success = self._prefill(input_ids=input_ids)
         
+        if not success:
+            api_args["generated_text"] = ""
+            api_args["generated_tokens"] = []
+            api_args["avg_accept_tokens"] = 0
+            api_args["time_per_output_token"] = 0
+            self.reset()
+            return api_args
+    
         torch.cuda.synchronize()
         t1 = time.time()
         large_model_step = 0
         decode = True
         start = self.num_nodes
         
-        while decode and (self.num_nodes - start) < max_new_tokens:
+        while decode and (self.num_nodes - start) < max_new_tokens and self.validate_status():
             self.build_tree()
             decode = self.verify()
             large_model_step = large_model_step + 1
