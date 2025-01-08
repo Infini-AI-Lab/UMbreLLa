@@ -422,7 +422,7 @@ class StaticSpeculationEngine(BaseEngine):
         dec_len = (self.num_nodes - start + 1)
         generated_text = self.tokenizer.decode(
         self.tokens[0,start:self.num_nodes+1].tolist(), 
-        skip_special_tokens=False,
+        skip_special_tokens=True,
         clean_up_tokenization_spaces=False
         )
         
