@@ -7,65 +7,68 @@ from umbrella.logging_config import setup_logger
 import argparse
 import json
 from umbrella.templates import Prompts, SysPrompts
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--configuration', type=str, default="../configs/chat_config_24gb.json",help='the configuration of the chatbot')
+parser.add_argument('--configuration', type=str, default="../configs/chat_config_24gb.json", help='the configuration of the chatbot')
 args = parser.parse_args()
 logger = setup_logger()
 
 DEVICE = "cuda:0"
 with open(args.configuration, "r") as f:
     config = json.load(f)
-    
 
 template = config.pop("template", "meta-llama3")
 system_prompt = SysPrompts[template]
 user_prompt = Prompts[template]
+
 engine = AutoEngine.from_config(DEVICE, **config)
 engine.initialize()
 
 
-
-
-def generate_response(prompt, max_new_tokens=100, temperature=0.3, top_p=0.95, repetition_penalty=1.0):
-    
-    inputs = {"context": prompt, "max_new_tokens":max_new_tokens, "temperature": temperature, "top_p":top_p, "repetition_penalty":repetition_penalty} 
-    print(inputs)
-    
-    output = engine.generate(**inputs)
-    log_str = "Avg Accept Tokens {:.2f} | TPOT {:.2f} ms ".format(output["avg_accept_tokens"], output["time_per_output_token"])
-    
-    return output['generated_text'], log_str
-
-def chat_fn(user_input, history, max_new_tokens, temperature, top_p, repetition_penalty):
+########################
+# 1) 新增：真正流式方法 #
+########################
+def chat_fn_stream(user_input, history, max_new_tokens, temperature, top_p, repetition_penalty):
     """
-    history 是一个 [(user_message, bot_message), (user_message, bot_message), ...] 的列表
-    user_input 是当前最新一轮用户输入
+    调用 engine.generate_stream(...)，多次yield实现真正的流式输出
     """
-    # 将历史对话拼成一个长prompt，或者你也可以用别的方式
-    prompt = ""
-    prompt = prompt + system_prompt
-    for i, (old_user_input, old_bot_output) in enumerate(history):
-        prompt += (user_prompt.format(old_user_input) + old_bot_output)
+    # 拼接 prompt
+    prompt = system_prompt
+    for (old_user_input, old_bot_output) in history:
+        prompt += user_prompt.format(old_user_input) + old_bot_output
     prompt += user_prompt.format(user_input)
+    
+    # 调用 engine.generate_stream
+    stream = engine.generate_stream(
+        context=prompt,
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        top_p=top_p,
+        repetition_penalty=repetition_penalty,
+    )
+    
+    partial_bot_response = ""
+    for new_text, perf_log in stream:
+        # 假设 generate_stream 逐步返回累积文本
+        partial_bot_response = new_text
+        
+        # 临时对话：当前已完成的 + 这一轮还未完成的回答
+        temp_history = history + [(user_input, partial_bot_response)]
+        
+        # 这里 log_box 先返回空字符串，也可只在最后一次yield里更新
+        yield temp_history, temp_history, perf_log, ""
+    
+    # 结束后，把完整回答加入 history
+    history.append((user_input, partial_bot_response))
 
-    bot_response, log_str = generate_response(prompt, max_new_tokens, temperature, top_p, repetition_penalty)
-    # 返回新的对话历史
-    history.append((user_input, bot_response))
-    return history, history, log_str, ""
 
-custom_css = """
-body {
-    background-color: #f0f0f0;
-}
-.btn-primary {
-    background-color: #007BFF;
-    border-color: #007BFF;
-}
-"""
-with gr.Blocks(theme="monochrome", title="Infini AI Chatbot", css=custom_css) as demo:
+########################
+# 2) 原UI部分不变或少改 #
+########################
+with gr.Blocks(theme="monochrome", title="Chatbot") as demo:
     log_box = gr.Textbox(label="Performance")
     chatbot = gr.Chatbot(label="Infini AI Chatbot")
-    msg = gr.Textbox(label="input", placeholder="Input here ...")
+    msg = gr.Textbox(label="Input", placeholder="Input here ...")
     
     with gr.Row():
         max_new_tokens_slider = gr.Slider(
@@ -101,11 +104,15 @@ with gr.Blocks(theme="monochrome", title="Infini AI Chatbot", css=custom_css) as
         )
         
     clear = gr.Button("clear")
-    
-    
-    state = gr.State([])  
+    state = gr.State([])
 
-    msg.submit(chat_fn, [msg, state, max_new_tokens_slider, temperature_slider, top_p_slider, repetition_penalty_slider], [chatbot, state, log_box, msg])
+    
+    msg.submit(
+        fn=chat_fn_stream,
+        inputs=[msg, state, max_new_tokens_slider, temperature_slider, top_p_slider, repetition_penalty_slider],
+        outputs=[chatbot, state, log_box, msg]
+    )
+
     clear.click(lambda: [], None, chatbot, queue=False)
     clear.click(lambda: "", None, log_box, queue=False)
     clear.click(lambda: [], None, state, queue=False)

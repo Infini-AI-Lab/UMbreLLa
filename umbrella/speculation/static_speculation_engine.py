@@ -434,4 +434,131 @@ class StaticSpeculationEngine(BaseEngine):
         return api_args
     
     
-    
+    @torch.inference_mode()
+    def generate_stream(self, **api_args):
+        """
+        和原先的 speculative_decoding 类似，但把输出改为流式返回（yield）。
+        在 Gradio 中调用这个函数后，可逐步获取模型输出。
+        """
+        
+        self.update_generation_args(**api_args)
+        input_ids = api_args.get("input_ids", None)
+        max_new_tokens = api_args.get("max_new_tokens", 128)
+        
+        if input_ids is None:
+            context = api_args.get("context", None)
+            if context is None or len(context) == 0 or max_new_tokens == 0:
+                api_args["generated_text"] = ""
+                api_args["generated_tokens"] = []
+                api_args["avg_accept_tokens"] = 0
+                api_args["time_per_output_token"] = 0
+                return api_args
+            self.prefill(context)
+        
+        else:
+            if len(input_ids) == 0 or max_new_tokens == 0:
+                api_args["generated_text"] = ""
+                api_args["generated_tokens"] = []
+                api_args["avg_accept_tokens"] = 0
+                api_args["time_per_output_token"] = 0
+                return api_args
+            input_ids = torch.Tensor(input_ids).long().unsqueeze(0).to(self.device)
+            self._prefill(input_ids=input_ids)
+        
+        max_new_tokens = max(max_new_tokens, self.stop_distance)
+        torch.cuda.synchronize()
+        t1 = time.time()
+        large_model_step = 0
+        decode = True
+        start = self.num_nodes
+        generated_ids = []
+        pos = 0
+
+        # 用于累积、输出的字符串
+        partial_text = ""
+
+        while decode and self.validate_status():
+            begin_pos = self.num_nodes
+
+            # 1) 构建/扩展树
+            self.build_tree()
+
+            # 2) 验证（假设你的 verify() 决定是否继续decode）
+            decode = self.verify()
+            large_model_step += 1
+
+            # 3) 收集新生成的 token
+            new_ids = self.tokens[0, begin_pos : self.num_nodes].tolist()
+            generated_ids.extend(new_ids)
+
+            # 4) 将所有 token decode 成字符串数组
+            generated_text_list = (
+                self.tokenizer.decode(
+                    generated_ids,
+                    skip_special_tokens=True,
+                    clean_up_tokenization_spaces=False,
+                    spaces_between_special_tokens=False,
+                )
+                .strip()
+                .split(" ")
+            )
+
+            now = len(generated_text_list) - 1
+            # 如果有新增的 tokens，就把它们拼到 partial_text 中，并 yield
+            if now > pos:
+                # 把本次新增的片段拼为一段字符串
+                new_text_chunk = " ".join(generated_text_list[pos:now]) + " "
+                partial_text += new_text_chunk
+
+                # 在这里把当前累积的文本串 yield 给前端
+                t2 = time.time()
+                dec_len = (self.num_nodes - start + 1)
+                
+                perf_log = "Output Tokens {} | Avg Accept Tokens {:.2f} | TPOT {:.2f} ms ".format(
+                    dec_len, dec_len / large_model_step, 1000 * (t2 - t1) / dec_len
+                )
+                
+                yield partial_text, perf_log
+
+                pos = now
+
+            # 5) 判断结束条件
+            #    (1) 句子似乎完整 + 生成到达限制
+            #    (2) or 达到 max_new_tokens
+            if (
+                is_sentence_complete_regex(generated_text_list[-1]) 
+                and (self.num_nodes - start >= max_new_tokens - self.stop_distance)
+            ) or ((self.num_nodes - start) >= max_new_tokens):
+                decode = False
+
+        # 跳出循环后，把剩余的那部分也加入到 partial_text
+        # (如果最后一次循环没有正好拼完)
+        final_piece = " ".join(generated_text_list[pos:])
+        if final_piece:
+            partial_text += final_piece
+
+        # 再 yield 一次，确保全部文本都发给前端
+        
+        t2 = time.time()
+        dec_len = (self.num_nodes - start + 1)
+                
+        perf_log = "Output Tokens {} | Avg Accept Tokens {:.2f} | TPOT {:.2f} ms ".format(
+                    dec_len, dec_len / large_model_step, 1000 * (t2 - t1) / dec_len
+                )
+        
+        yield partial_text, perf_log
+
+        # (以下保持和你原先类似的日志逻辑)
+        torch.cuda.synchronize()
+        t2 = time.time()
+        dec_len = (self.num_nodes - start + 1)
+        logger.info(
+            TextColors.colorize(
+                "Output Tokens {} | Avg Accept Tokens {:.2f} | TPOT {:.2f} ms ".format(
+                    dec_len, dec_len / large_model_step, 1000 * (t2 - t1) / dec_len
+                ),
+                "magenta",
+            )
+        )
+
+        self.reset()
