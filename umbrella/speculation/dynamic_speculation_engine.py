@@ -430,7 +430,7 @@ class DynamicSpeculationEngine(BaseEngine):
                 api_args["avg_accept_tokens"] = 0
                 api_args["time_per_output_token"] = 0
                 return api_args
-            self.prefill(context)
+            success = self.prefill(context)
         
         else:
             if len(input_ids) == 0 or max_new_tokens == 0:
@@ -440,8 +440,10 @@ class DynamicSpeculationEngine(BaseEngine):
                 api_args["time_per_output_token"] = 0
                 return api_args
             input_ids = torch.Tensor(input_ids).long().unsqueeze(0).to(self.device)
-            self._prefill(input_ids=input_ids)
+            success = self._prefill(input_ids=input_ids)
         
+        if not success:
+            yield "Exceeding reserved allowed context length", "Exceeding reserved allowed context length"
         max_new_tokens = max(max_new_tokens, self.stop_distance)
         torch.cuda.synchronize()
         t1 = time.time()
