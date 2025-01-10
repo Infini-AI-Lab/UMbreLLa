@@ -55,3 +55,6 @@ class BaseEngine(ABC):
     def generate(self, **api_args):
         raise NotImplementedError
     
+    @abstractmethod
+    def generate_stream(self, **api_args):
+        raise NotImplementedError
