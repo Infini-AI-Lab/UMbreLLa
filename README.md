@@ -241,23 +241,43 @@ output1 = client.get_output(**input1)
     "template": "meta-llama3"
 }
 ```
-`model`: Target LLM to serve.
+<h4>Key Configuration Options</h4>
+<ul>
+    <li><strong>model</strong>: Specifies the target LLM to serve, e.g., <code>"hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4"</code>.</li>
+    <li><strong>draft_model</strong>: Lightweight draft model, e.g., <code>"meta-llama/Llama-3.2-1B-Instruct"</code>.</li>
+    <li><strong>offload</strong>: Enables offloading of the target model to host memory or disk (<code>true</code> or <code>false</code>).</li>
+    <li><strong>cuda_graph</strong>: Toggles CUDA graph optimization for the draft model (currently unsupported for AWQ models).</li>
+    <li><strong>max_length</strong>: The maximum token length for input and output combined.</li>
+    <li><strong>num_cache_layers</strong>: Sets the number of layers cached during inference (e.g., for memory optimization).</li>
+    <li><strong>generation_length</strong>: Maximum length of generated responses in tokens.</li>
+    <li><strong>max_turns</strong>: Limits the number of conversational turns retained in memory.</li>
+    <li><strong>topk</strong>: Limits token selection during generation to the top <code>k</code> most likely tokens.</li>
+    <li><strong>temperature</strong>: Controls randomness in token selection (lower values = more deterministic outputs).</li>
+    <li><strong>topp</strong>: Enables nucleus sampling by limiting token selection to those with cumulative probability ≤ <code>p</code>.</li>
+    <li><strong>repetition_penalty</strong>: Penalizes repetitive text generation (values > 1 discourage repetition).</li>
+    <li><strong>growmap_path</strong>: Path to the speculative decoding tree used by the static engine (e.g., <code>"../umbrella/trees/sequoia_tree-3x4.json"</code>).</li>
+</ul>
 
-`draft_model`: Draft model.
+<h4>Dynamic Engine-Specific Hyperparameters</h4>
+<ul>
+    <li><strong>engine</strong>: Defines the decoding strategy. Choose between:
+        <ul>
+            <li><code>"static"</code>: Optimized for on-device execution.</li>
+            <li><code>"dynamic"</code>: Designed for offloading scenarios.</li>
+        </ul>
+    </li>
+    <li><strong>width</strong>, <strong>num_beams</strong>, <strong>depth</strong>: Hyperparameters for speculative decoding in dynamic engines.</li>
+</ul>
 
-`offload`: Whether offload the target model.
-
-`cuda_graph`: Whether apply cuda graph for draft model (AWQ not supported now).
-
-`engine`: static (for on device) or dynamic (for offloading).
-
-`width`, `num_beams`,`depth`: Speculative decoding hyper-parameters for dynamic engine.
-
-`growmap_path`: Speculative decoding tree for static engine.
-
-`template`: Template for prompts. Currently we support `llama3-code` and `meta-llama3`.
-
-Other parameters are generation arguments.
+<h4>Prompt Template</h4>
+<ul>
+    <li><strong>template</strong>: Defines the structure for input prompts. Supported values include:
+        <ul>
+            <li><code>"llama3-code"</code>: Optimized for code-related tasks.</li>
+            <li><code>"meta-llama3"</code>: General-purpose instruction-following template.</li>
+        </ul>
+    </li>
+</ul>
 
 ## Reference
 ```bibtex
