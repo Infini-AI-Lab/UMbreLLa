@@ -8,11 +8,11 @@
 <i>Using UMbreLLa, 70B-level models can achieve performance comparable to human reading speed on an RTX 4070Ti, delivering exceptional efficiency and responsiveness.</i>
 </div>
 
-## Models and Benchmarks
+## 1. Models Supported and Benchmarks
 
 The throughput is measured with a batch size of 1 to directly mirror the user experience.
 
-### MT Bench
+### 1.1 MT Bench
 <table>
   <thead>
     <tr>
@@ -94,7 +94,7 @@ The throughput is measured with a batch size of 1 to directly mirror the user ex
 
 
 
-### Code Completion
+### 1.2 Code Completion
 <table>
   <thead>
     <tr>
@@ -169,14 +169,44 @@ The throughput is measured with a batch size of 1 to directly mirror the user ex
 
 *Offloading experiments heavily rely on the status of PCIE, and may vary across instances.*
 
-## Deploying your LLMs with UMbreLLa
+## 2 Deploying your LLMs with UMbreLLa
 
-### CLI Chatbot
+### 2.1 Install
+```bash
+conda create -n umbrella python=3.10
+bash install.sh
+```
+### 2.2 CLI Chatbot
+```bash
+cd app
+python chatbot.py --configuration ../configs/chat_config_24gb.json
+```
 
-### API Server/Client
+Then you can chat with the LLM specified in `chat_config_24gb.json`.
 
-### Gradio Chatbot
+### 2.3 Gradio Chatbot
+```bash
+cd app
+python gradio_chat.py --configuration ../configs/chat_config_24gb.json
+```
 
+Then you can chat with the LLM specified in `chat_config_24gb.json` in Gradio.
+
+### 2.4 API Server/Client
+#### 2.4.1 Server
+```bash
+cd app
+python api.py --configuration ../configs/chat_config_24gb.json --max_client 1 --port 65432
+```
+
+`configuration` specifies the LLM and speculative decoding details.
+
+`max_client` is the maximum clients that can connect to the server.
+
+`port` is the port of the server.
+
+#### 2.4.2 Client
+After the server is started, 
 
 ## Reference
 ```bibtex
