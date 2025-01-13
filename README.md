@@ -1,8 +1,15 @@
+<div style="text-align: center;">
 # UMbreLLa
 
-Best practice (Offloading + Speculative Decoding + Quantization) for deploying LLMs for single users.
+The best practice for deploying LLMs tailored to single-user scenarios. Using UMbreLLa, 70B-level models can achieve performance comparable to human reading speed on an RTX 4070Ti, delivering exceptional efficiency and responsiveness.
+
+<img src="assets/umbrella.jpeg" width="200" align="top"/>
+<b>Offloading+ Speculative Decoding + Quantization</b>
+</div>
 
 ## Models and Benchmarks
+
+The throughput is measured with a batch size of 1 to directly mirror the user experience.
 
 ### MT Bench
 <table>
