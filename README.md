@@ -10,6 +10,7 @@ The best practice for deploying LLMs tailored to single-user scenarios. Using UM
 <div style="text-align: center;">
 <b>Offloading+ Speculative Decoding + Quantization</b>
 </div>
+
 ## Models and Benchmarks
 
 The throughput is measured with a batch size of 1 to directly mirror the user experience.
