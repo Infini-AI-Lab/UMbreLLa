@@ -9,7 +9,7 @@
 </div>
 
 <figure style="text-align: center;">
-  <img src="assets/4070ti.gif" alt="demogif">
+  <img src="assets/4070ti.gif" height="150px" alt="demogif">
   <figcaption>Deploy 4bit Llama3.1-70B model on RTX 4070Ti with UMbreLLa</figcaption>
 </figure>
 
