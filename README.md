@@ -4,6 +4,10 @@
 </h1>
 </div>
 
+<div align="center">
+<i>Using UMbreLLa, 70B-level models can achieve performance comparable to human reading speed on an RTX 4070Ti, delivering exceptional efficiency and responsiveness.</i>
+</div>
+
 ## Models and Benchmarks
 
 The throughput is measured with a batch size of 1 to directly mirror the user experience.
