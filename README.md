@@ -5,7 +5,7 @@
 </div>
 
 <div align="center">
-<i>Using UMbreLLa, 70B-level models can achieve performance comparable to human reading speed on an RTX 4070Ti, delivering exceptional efficiency and responsiveness, and especially expertised on coding tasks.</i>
+<i>UMbreLLa combines offloading, speculative decoding and quantization, tailored to single-user LLM deployment scenarios. Using UMbreLLa, 70B-level models can achieve performance comparable to human reading speed on an RTX 4070Ti, delivering exceptional efficiency and responsiveness, and especially expertised on coding tasks.</i>
 </div>
 
 ## 1. Models Supported and Benchmarks
