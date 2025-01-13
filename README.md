@@ -1,14 +1,7 @@
 
-# UMbreLLa
-
-The best practice for deploying LLMs tailored to single-user scenarios. Using UMbreLLa, 70B-level models can achieve performance comparable to human reading speed on an RTX 4070Ti, delivering exceptional efficiency and responsiveness.
-
-<div style="text-align: center;">
-<img src="assets/umbrella.jpeg" width="200" align="top"/>
-</div>
-
-<div style="text-align: center;">
-<b>Offloading+ Speculative Decoding + Quantization</b>
+<div align="center">
+<h1><img src="assets/umbrella.jpeg" height="40px" align="top"/> UMbreLLa: Deploying LLMs for single-user scenarios 
+</h1>
 </div>
 
 ## Models and Benchmarks
