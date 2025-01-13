@@ -1,6 +1,6 @@
 
 <div align="center">
-<h1><img src="assets/umbrella.jpeg" height="40px" align="top"/> UMbreLLa: Deploying LLMs for single-user scenarios 
+<h1><img src="assets/umbrella.jpeg" height="40px" align="top"/> UMbreLLa: Deploying LLMs for Single-User Scenarios 
 </h1>
 </div>
 
