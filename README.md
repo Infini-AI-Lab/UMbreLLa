@@ -206,7 +206,18 @@ python api.py --configuration ../configs/chat_config_24gb.json --max_client 1 --
 `port` is the port of the server.
 
 #### 2.4.2 Client
-After the server is started, 
+After the server is started, Client can be started and connect to the server by
+```python
+from umbrella.api.client import APIClient
+client = APIClient(port=port) #port should be the same as the server
+client.run()
+```
+
+To get the LLM output,
+```python
+input1 = {"context": text1, "max_new_tokens": 512, "temperature": 0.0}
+output1 = client.get_output(**input1)
+```
 
 ## Reference
 ```bibtex
