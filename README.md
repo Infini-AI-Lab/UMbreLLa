@@ -167,6 +167,7 @@ The throughput is measured with a batch size of 1 to directly mirror the user ex
   </tbody>
 </table>
 
+*Offloading experiments heavily rely on the status of PCIE, and may vary across instances.*
 
 ## Deploying your LLMs with UMbreLLa
 
