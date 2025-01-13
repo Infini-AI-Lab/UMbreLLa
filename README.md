@@ -9,13 +9,13 @@
 </div>
 
 
-<center>
-  <figure>
-    <img src="assets/4070ti.gif" height="150px" alt="demogif">
-    <figcaption>Deploy 4bit Llama3.1-70B model on RTX 4070Ti with UMbreLLa</figcaption>
-  </figure>
-</center>
+<p align="center">
+  <img src="assets/4070ti.gif" height=150px alt="demogif">
+</p>
 
+<div align="center">
+<i>Deploy 4bit Llama3.1-70B model on RTX 4070Ti with UMbreLLa</i>
+</div>
 
 ## 1. Models Supported and Benchmarks
 
