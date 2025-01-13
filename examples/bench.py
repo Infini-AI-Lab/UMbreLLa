@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 from umbrella.models.auto_model import AutoModelLM
 import argparse
 import time

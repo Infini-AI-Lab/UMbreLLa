@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 from umbrella.api.server import APIServer
 from umbrella.api.client import APIClient
 from umbrella.templates import Prompts, SysPrompts

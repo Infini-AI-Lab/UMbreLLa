@@ -1,8 +1,5 @@
-import sys
-sys.path.append("..")
 import gradio as gr
 from umbrella.speculation.auto_engine import AutoEngine
-from umbrella.utils import TextColors
 from umbrella.logging_config import setup_logger
 import argparse
 import json

@@ -1,9 +1,4 @@
-import sys
-sys.path.append("..")
 import json
-import os.path as osp
-import ssl
-import urllib.request
 import os
 from umbrella.speculation.dynamic_speculation_engine import DynamicSpeculationEngine
 from umbrella.speculation.static_speculation_engine import StaticSpeculationEngine

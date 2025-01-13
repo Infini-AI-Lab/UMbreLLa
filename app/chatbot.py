@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 from umbrella.speculation.auto_engine import AutoEngine
 from umbrella.logging_config import setup_logger
 from umbrella.utils import TextColors

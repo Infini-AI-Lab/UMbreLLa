@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from umbrella.models.auto_model import AutoModelLM

@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from datasets import load_dataset

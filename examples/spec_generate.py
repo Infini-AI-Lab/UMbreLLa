@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from umbrella.speculation.dynamic_speculation_engine import DynamicSpeculationEngine

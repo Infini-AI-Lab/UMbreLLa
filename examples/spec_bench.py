@@ -1,5 +1,3 @@
-import sys
-sys.path.append("..")
 import json
 import os.path as osp
 import ssl
