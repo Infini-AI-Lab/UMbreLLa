@@ -12,10 +12,12 @@ from transformers import AutoTokenizer
 from tqdm import tqdm
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default="meta-llama/Llama-3.1-8B-Instruct",help='model')
-parser.add_argument('--draft_model', type=str, default="Zhuominc/FastCode-500M",help='model')
+parser.add_argument('--draft_model', type=str, default="InfiniAILab/CodeDrafter-500M",help='model')
 parser.add_argument('--offload', action='store_true', help="offload the model")
 parser.add_argument('--cuda_graph', action='store_true', help="whether use cuda graph")
-parser.add_argument('--w', type=int, default=8, help="whether use cuda graph")
+parser.add_argument('--w', type=int, default=3, help="tree width")
+parser.add_argument('--d', type=int, default=4, help="tree depth")
+parser.add_argument('--dst', type=str, default="../umbrella/trees/sequoia_tree.json", help="tree depth")
 args = parser.parse_args()
 
 system_prompt = SysPrompts['llama3-code']
@@ -85,7 +87,4 @@ for d in tqdm(data['test']):
     
 
 
-generate_sequoia_tree(width=5, depth=6, acc=acceptance_rate.tolist(), json_file="../umbrella/trees/8b_sequoia_tree-5x6.json")
-generate_sequoia_tree(width=5, depth=8, acc=acceptance_rate.tolist(), json_file="../umbrella/trees/8b_sequoia_tree-5x8.json")
-generate_sequoia_tree(width=6, depth=6, acc=acceptance_rate.tolist(), json_file="../umbrella/trees/8b_sequoia_tree-6x6.json")
-generate_sequoia_tree(width=6, depth=7, acc=acceptance_rate.tolist(), json_file="../umbrella/trees/8b_sequoia_tree-6x7.json")
+generate_sequoia_tree(width=args.w, depth=args.d, acc=acceptance_rate.tolist(), json_file=args.dst)
