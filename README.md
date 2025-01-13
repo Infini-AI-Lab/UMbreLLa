@@ -148,17 +148,6 @@ Best practice (Offloading + Speculative Decoding + Quantization) for deploying L
     <tr>
       <td rowspan="2">L40</td>
       <td>Llama3.1-70B-Instruct-AWQ</td>
-      <td>Llama3.2-1B-Instruct</td>
-      <td>9.7</td>
-    </tr>
-    <tr>
-      <td>Llama3.3-70B-Instruct-AWQ</td>
-      <td>Llama3.2-1B-Instruct</td>
-      <td>9.6</td>
-    </tr>
-    <tr>
-      <td rowspan="2">L40</td>
-      <td>Llama3.1-70B-Instruct-AWQ</td>
       <td>CodeDrafter-500M</td>
       <td>45.6</td>
     </tr>
