@@ -290,6 +290,55 @@ output1 = client.get_output(**input1)
     </li>
 </ul>
 
+
+## 4 Basic Usage
+
+### 4.1 Initialize a Speculation Engine 
+
+```python
+from umbrella.speculation.auto_engine import AutoEngine
+DEVICE = "cuda:0"
+engine = AutoEngine.from_config(device=DEVICE, **config)
+engine.initialize()
+```
+### 4.2 Prefill, Append and Decode
+
+```python
+GEN_LEN = 512
+text1 = "Tell me what you know about Reinforcement Learning in 100 words."
+text2 = "Tell me what you know about LSH in 100 words."
+
+engine.prefill(text1) # The first operation must be prefilling
+engine.speculative_decoding(max_new_tokens=GEN_LEN)
+
+engine.append(text2)
+engine.speculative_decoding(max_new_tokens=GEN_LEN)
+```
+
+### 4.3 Other functions for API and Gradio
+
+```python
+output = engine.generate(
+        context=prompt, 
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        top_p=top_p,
+        repetition_penalty=repetition_penalty,
+    )
+# return a dict containing token ids and detokenized texts
+# context=prompt (str) can be replaced by input_ids=tokens list[int]
+
+stream = engine.generate_stream(
+        context=prompt, 
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        top_p=top_p,
+        repetition_penalty=repetition_penalty,
+    )
+# return a stream containing detokenized texts
+# context=prompt (str) can be replaced by input_ids=tokens list[int]
+```
+
 ## Reference
 ```bibtex
 @article{chen2024sequoia,
