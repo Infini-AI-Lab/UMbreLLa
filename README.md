@@ -242,13 +242,21 @@ output1 = client.get_output(**input1)
 }
 ```
 `model`: Target LLM to serve.
+
 `draft_model`: Draft model.
+
 `offload`: Whether offload the target model.
+
 `cuda_graph`: Whether apply cuda graph for draft model (AWQ not supported now).
-`engine`: static (for on device) or dynamic (for offloading)
+
+`engine`: static (for on device) or dynamic (for offloading).
+
 `width`, `num_beams`,`depth`: Speculative decoding hyper-parameters for dynamic engine.
+
 `growmap_path`: Speculative decoding tree for static engine.
+
 `template`: Template for prompts. Currently we support `llama3-code` and `meta-llama3`.
+
 Other parameters are generation arguments.
 
 ## Reference
