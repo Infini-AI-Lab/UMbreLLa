@@ -10,7 +10,7 @@
 
 
 <p align="center">
-  <img src="assets/4070ti.gif" height=150px alt="demogif">
+  <img src="assets/4070ti.gif" height=250px alt="demogif">
 </p>
 
 <div align="center">
