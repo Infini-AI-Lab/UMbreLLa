@@ -8,12 +8,14 @@
 <i>UMbreLLa combines offloading, speculative decoding and quantization, tailored to single-user LLM deployment scenarios. Using UMbreLLa, 70B-level models can achieve performance comparable to human reading speed on an RTX 4070Ti, delivering exceptional efficiency and responsiveness, and especially expertised on coding tasks.</i>
 </div>
 
-<div align="center">
-<figure style="text-align: center;">
-  <img src="assets/4070ti.gif" height="150px" alt="demogif">
-  <figcaption>Deploy 4bit Llama3.1-70B model on RTX 4070Ti with UMbreLLa</figcaption>
-</figure>
-</div>
+
+<center>
+  <figure>
+    <img src="assets/4070ti.gif" height="150px" alt="demogif">
+    <figcaption>Deploy 4bit Llama3.1-70B model on RTX 4070Ti with UMbreLLa</figcaption>
+  </figure>
+</center>
+
 
 ## 1. Models Supported and Benchmarks
 
