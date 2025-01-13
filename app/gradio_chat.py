@@ -63,12 +63,13 @@ def chat_fn_stream(user_input, history, max_new_tokens, temperature, top_p, repe
 # 2) 原UI部分不变或少改 #
 ########################
 with gr.Blocks(theme="monochrome", title="Chatbot") as demo:
-    model_name_box = gr.Textbox(
-        value=config["model"],      # 这里把上面获取到的模型名称放进来
-        label="Model",    # 标签
-        interactive=False      # 只读展示
-    )
-    log_box = gr.Textbox(label="Performance")
+    with gr.Row():
+        model_name_box = gr.Textbox(
+            value=config["model"],      # 这里把上面获取到的模型名称放进来
+            label="Model",    # 标签
+            interactive=False      # 只读展示
+        )
+        log_box = gr.Textbox(label="Performance")
     chatbot = gr.Chatbot(label="Infini AI Chatbot")
     msg = gr.Textbox(label="Input", placeholder="Input here ...")
     
