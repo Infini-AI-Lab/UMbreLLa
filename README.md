@@ -218,6 +218,38 @@ To get the LLM output,
 input1 = {"context": text1, "max_new_tokens": 512, "temperature": 0.0}
 output1 = client.get_output(**input1)
 ```
+## 3 Config the LLM Engine
+```json
+{
+    "model": "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4", 
+    "draft_model": "meta-llama/Llama-3.2-1B-Instruct",
+    "offload": true,
+    "cuda_graph": false,
+    "max_length": 4096,
+    "num_cache_layers": 0,
+    "generation_length": 256,
+    "max_turns": 12,
+    "topk": 32,
+    "temperature": 0.6,
+    "topp": 0.9,
+    "repetition_penalty": 1.05,
+    "growmap_path": "../umbrella/trees/sequoia_tree-3x4.json",
+    "width": 16,
+    "num_beams": 24,
+    "depth": 16,
+    "engine": "dynamic",
+    "template": "meta-llama3"
+}
+```
+`model`: Target LLM to serve.
+`draft_model`: Draft model.
+`offload`: Whether offload the target model.
+`cuda_graph`: Whether apply cuda graph for draft model (AWQ not supported now).
+`engine`: static (for on device) or dynamic (for offloading)
+`width`, `num_beams`,`depth`: Speculative decoding hyper-parameters for dynamic engine.
+`growmap_path`: Speculative decoding tree for static engine.
+`template`: Template for prompts. Currently we support `llama3-code` and `meta-llama3`.
+Other parameters are generation arguments.
 
 ## Reference
 ```bibtex
