@@ -36,7 +36,8 @@ class AutoModelLM:
         "Zhuominc/Coder-670M": Llama,
         "Zhuominc/Coder-400M": Llama,
         "Zhuominc/Coder-400M-IT": Llama,
-        "Zhuominc/FastCode-500M": Llama
+        "Zhuominc/FastCode-500M": Llama,
+        "InfiniAILab/CodeDrafter-500M": Llama
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
@@ -51,7 +52,8 @@ class AutoModelLM:
         "Zhuominc/Coder-670M": LlamaCudagraph,
         "Zhuominc/Coder-400M": LlamaCudagraph,
         "Zhuominc/Coder-400M-IT": LlamaCudagraph,
-        "Zhuominc/FastCode-500M": LlamaCudagraph
+        "Zhuominc/FastCode-500M": LlamaCudagraph,
+        "InfiniAILab/CodeDrafter-500M": LlamaCudagraph
     }
     
     @classmethod
