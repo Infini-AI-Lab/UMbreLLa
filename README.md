@@ -180,6 +180,7 @@ Evaluated on `ananyarn/Algorithm_and_Python_Source_Code`.
 
 *Offloading experiments heavily rely on the status of PCIE, and may vary across instances.*
 
+❌ UMbreLLa is not designed for large-scale LLM serving.
 ## 2 Deploying your LLMs with UMbreLLa
 
 ### 2.1 Install
@@ -290,6 +291,7 @@ output1 = client.get_output(**input1)
     </li>
 </ul>
 
+⚠️Notice: <strong>width</strong>, <strong>num_beams</strong>, <strong>depth</strong>, and <strong>growmap_path</strong> require tuning according to GPUs. Several examples are provided in `./configs` and `./umbrella/trees`.
 
 ## 4 Basic Usage
 
