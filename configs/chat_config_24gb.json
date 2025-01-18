@@ -1,7 +1,7 @@
 {
     "model": "Qwen/Qwen2.5-3B-Instruct",
-    "draft_model": "hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4",
-    "offload": true,
+    "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "offload": false,
     "max_length": 8192,
     "num_cache_layers": 16,
     "generation_length": 256,

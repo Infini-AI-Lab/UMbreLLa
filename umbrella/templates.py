@@ -11,7 +11,7 @@ Prompts = {
 {}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
 <|python_tag|>""",
-    'qwen': """<|im_start|>user{}<|im_end|><|im_start|>assistant<|im_end|>"""
+'qwen': """<|im_start|>user{}<|im_end|><|im_start|>assistant<|im_end|>"""
 }
 
 SysPrompts = {

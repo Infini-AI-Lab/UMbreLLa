@@ -1,4 +1,4 @@
-from transformers import Qwen2ForCausalLM, Qwen2Config
+from transformers import Qwen2ForCausalLM, Qwen2Config, AutoModelForCausalLM
 import torch
 import torch.nn.functional as F
 import gc
@@ -225,7 +225,7 @@ class QwenAwq(Qwen):
         
         self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
         
-        hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
+        hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
             self.lm_head = self.embed_tokens
@@ -328,7 +328,7 @@ class QwenAwqOffload(QwenOffload):
         self.num_cache_layers = kwargs["num_cache_layers"] if 'num_cache_layers' in kwargs else 0
         self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
         
-        hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
+        hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
             self.lm_head = self.embed_tokens
