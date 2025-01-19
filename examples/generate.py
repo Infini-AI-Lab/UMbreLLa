@@ -1,4 +1,8 @@
 import os
+import sys
+# Add the parent directory to Python path to find local UMbreLLa first
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from umbrella.models.auto_model import AutoModelLM
 from umbrella.logging_config import setup_logger
