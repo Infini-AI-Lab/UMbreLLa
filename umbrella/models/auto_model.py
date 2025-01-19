@@ -1,4 +1,5 @@
 from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
+from .qwen import Qwen, QwenOffload, QwenCudagraph
 
 class AutoModelLM:
     """
@@ -15,6 +16,8 @@ class AutoModelLM:
         "meta-llama/Llama-3.1-8B-Instruct": LlamaOffload,
         "meta-llama/Meta-Llama-3-70B-Instruct": LlamaOffload,
         "meta-llama/Meta-Llama-3-8B-Instruct": LlamaOffload,
+        "Qwen/Qwen2.5-3B-Instruct": QwenOffload,
+        "Qwen/Qwen2.5-0.5B-Instruct": QwenOffload
     }
     
     _MODEL_MAPPING = {
@@ -37,7 +40,9 @@ class AutoModelLM:
         "Zhuominc/Coder-400M": Llama,
         "Zhuominc/Coder-400M-IT": Llama,
         "Zhuominc/FastCode-500M": Llama,
-        "InfiniAILab/CodeDrafter-500M": Llama
+        "InfiniAILab/CodeDrafter-500M": Llama,
+        "Qwen/Qwen2.5-3B-Instruct": Qwen,
+        "Qwen/Qwen2.5-0.5B-Instruct": Qwen
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
@@ -53,7 +58,9 @@ class AutoModelLM:
         "Zhuominc/Coder-400M": LlamaCudagraph,
         "Zhuominc/Coder-400M-IT": LlamaCudagraph,
         "Zhuominc/FastCode-500M": LlamaCudagraph,
-        "InfiniAILab/CodeDrafter-500M": LlamaCudagraph
+        "InfiniAILab/CodeDrafter-500M": LlamaCudagraph,
+        "Qwen/Qwen2.5-3B-Instruct": QwenCudagraph,
+        "Qwen/Qwen2.5-0.5B-Instruct": QwenCudagraph
     }
     
     @classmethod

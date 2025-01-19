@@ -10,8 +10,8 @@ Prompts = {
 
 {}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
-<|python_tag|>"""
-
+<|python_tag|>""",
+'qwen': """<|im_start|>user{}<|im_end|><|im_start|>assistant<|im_end|>"""
 }
 
 SysPrompts = {
@@ -21,7 +21,8 @@ You are a knowledgeable, efficient, and direct AI assistant. Provide concise ans
     'llama3-code': """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 Environment: ipython<|eot_id|>""",
-
+    'qwen': """<|im_start|>system
+You are a helpful assistant.<|im_end|>"""
 }
 
 ExtraPrompts = {
