@@ -171,3 +171,4 @@ cython_debug/
 .pypirc
 .vscode/
 app/.gradio/
+test*
