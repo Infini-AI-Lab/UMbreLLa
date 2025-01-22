@@ -42,6 +42,8 @@ llm = AutoModelLM.from_pretrained(
     device=DEVICE
 )
 eos_tokens = llm.config.eos_token_id
+if not isinstance(eos_tokens, list):
+    eos_tokens = [eos_tokens]
 llm.alloc()
 if args.cuda_graph:
     llm.initialize_cuda_graph([1])

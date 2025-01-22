@@ -28,7 +28,7 @@ engine = DynamicSpeculationEngine(
     target_model_name=target_model_name,
     device=DEVICE,
     max_length=8192,
-    num_cache_layers=16
+    num_cache_layers=24
 ) if args.offload else StaticSpeculationEngine(
     draft_model_name=draft_model_name,
     target_model_name=target_model_name,

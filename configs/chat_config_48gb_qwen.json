@@ -1,0 +1,18 @@
+{
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "draft_model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "offload": false,
+    "cuda_graph": true,
+    "max_length": 2048,
+    "num_cache_layers": 0,
+    "generation_length": 256,
+    "growmap_path": "../umbrella/trees/sequoia_tree-3x4.json",
+    "max_turns": 16,
+    "topk": 32,
+    "temperature": 0.6,
+    "topp": 0.9,
+    "repetition_penalty": 1.05,
+    "exit_layer":24,
+    "engine": "static",
+    "template": "qwen"
+}
