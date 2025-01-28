@@ -1,5 +1,6 @@
 from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
 from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph
+from .gemma import Gemma2
 class AutoModelLM:
     """
     自动模型加载器，根据模型类型动态加载对应的类。
@@ -102,7 +103,9 @@ class AutoModelLM:
         "Qwen/Qwen2.5-32B-Instruct-AWQ": QwenAwq,
         "Qwen/Qwen2.5-72B-Instruct-AWQ": QwenAwq,
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwq,
-        "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq
+        "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq,
+        "google/gemma-2-2b-it": Gemma2,
+        "google/gemma-2-2b": Gemma2
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
