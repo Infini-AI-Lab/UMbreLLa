@@ -26,7 +26,6 @@ class Gemma2(LLMBase):
         self.max_length = max_length
         self.hidden_size = self.config.hidden_size
         self.num_heads = self.config.num_attention_heads
-        # self.head_dim = self.hidden_size // self.num_heads
         self.head_dim = self.config.head_dim
         self.num_key_value_heads = self.config.num_key_value_heads
         self.num_key_value_groups = self.num_heads // self.num_key_value_heads
@@ -38,8 +37,6 @@ class Gemma2(LLMBase):
         self.final_logit_softcapping = self.config.final_logit_softcapping
 
     def alloc(self, **kwargs):
-
-        # TODO: can you use a KV cache for Gemma? (probably !?)
         self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
         hf_model = Gemma2ForCausalLM.from_pretrained(self.model_name, torch_dtype = self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
@@ -87,8 +84,6 @@ class Gemma2(LLMBase):
                 attention_mask: torch.FloatTensor,
                 storage_ids: torch.LongTensor):
         
-        ##TODO: fix the attention mask, Gemma uses a sliding window self attention 
-
         if buffer.is_sliding and attention_mask is not None:
             min_dtype = torch.finfo(hidden_states.dtype).min
             sliding_window_mask = torch.tril(
@@ -105,10 +100,6 @@ class Gemma2(LLMBase):
         hidden_states = layer_norm_gemma(hidden_states, buffer.input_layernorm_variance_epsilon, buffer.input_layernorm_weight)
         bsz, q_len, _ = hidden_states.size()
         query_states = F.linear(hidden_states, buffer.wq)
-        #print("sliding window?", buffer.is_sliding, buffer.sliding_window)
-        #print("query states size:", hidden_states.shape, buffer.wq.shape, query_states.shape)
-        #print("query_shape:", self.num_heads, self.head_dim)
-        #print("Weight shapes:", buffer.wq.shape, buffer.wk.shape, buffer.wv.shape, buffer.wo.shape)
         key_states = F.linear(hidden_states, buffer.wk)
         value_states = F.linear(hidden_states, buffer.wv)
         query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim)
@@ -167,7 +158,6 @@ class Gemma2(LLMBase):
             logits = F.tanh(logits)
             logits = logits * self.final_logit_softcapping
 
-        #print(logits.shape, logits[0,0,:10])
         return logits
 
     def gather_kv_incremental(self, indices: torch.LongTensor, offset:int):
