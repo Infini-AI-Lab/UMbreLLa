@@ -63,6 +63,17 @@ def layer_norm(
     hidden_states = hidden_states.reshape(b, s, h)
     return hidden_states
 
+def layer_norm_gemma(
+    hidden_states: torch.Tensor,
+    layernorm_variance_epsilon: float,
+    layernorm_weight: torch.Tensor,
+):  
+    b, s, h = hidden_states.shape
+    
+    hidden_states = hidden_states.reshape(b * s, h)
+    hidden_states = flashinfer.gemma_rmsnorm(hidden_states, layernorm_weight, layernorm_variance_epsilon)
+    hidden_states = hidden_states.reshape(b, s, h)
+    return hidden_states
 
 def capture_graph(
     llm, decoding_seqlen :int =1, mempool=None, n_warmups :int=3

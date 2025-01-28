@@ -14,11 +14,12 @@ class KV_Cache:
         self.max_length = max_length
         self.device = device
         self.dtype = dtype
+        self.head_dim = getattr(config, 'head_dim', config.hidden_size // config.num_attention_heads)
         self.k_cache = torch.zeros(
             config.num_hidden_layers,
             max_length,
             config.num_key_value_heads,
-            config.hidden_size // config.num_attention_heads,
+            self.head_dim,
             device=self.device,
             dtype=self.dtype
         )
@@ -27,7 +28,7 @@ class KV_Cache:
             config.num_hidden_layers,
             max_length,
             config.num_key_value_heads,
-            config.hidden_size // config.num_attention_heads,
+            self.head_dim,
             device=self.device,
             dtype=self.dtype
         )
@@ -35,7 +36,6 @@ class KV_Cache:
         self.kv_offset = 0
         self.num_key_value_heads = config.num_key_value_heads
         self.num_attention_heads = config.num_attention_heads
-        self.head_dim = config.hidden_size // config.num_attention_heads
         self.num_key_value_groups = config.num_attention_heads // config.num_key_value_heads
    
     def gather_kv_incremental(self, indices: torch.LongTensor, offset:int):
@@ -70,7 +70,8 @@ class KV_Cache:
         value_states :torch.Tensor,
         layer_idx, 
         storage_ids :torch.Tensor,
-        attention_mask :torch.Tensor):
+        attention_mask :torch.Tensor,
+        logits_soft_cap = 0):
         
         key_states, value_states = self.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)
         hidden_states = flashinfer.single_prefill_with_kv_cache(
@@ -79,7 +80,8 @@ class KV_Cache:
                 v = value_states,
                 kv_layout="NHD",
                 custom_mask=attention_mask[:,:self.kv_offset],
-                allow_fp16_qk_reduction=True
+                allow_fp16_qk_reduction=True,
+                logits_soft_cap = logits_soft_cap
             )
         
         return hidden_states

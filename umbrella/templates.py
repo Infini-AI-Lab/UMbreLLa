@@ -14,7 +14,14 @@ Prompts = {
    'qwen': """<|im_start|>user
 {}<|im_end|>
 <|im_start|>assistant
-"""
+""",
+
+'gemma2-it': """<start_of_turn>user
+{}<end_of_turn>
+<start_of_turn>model
+""",
+
+'gemma2': "{}"
 }
 
 SysPrompts = {
@@ -26,7 +33,9 @@ You are a knowledgeable, efficient, and direct AI assistant. Provide concise ans
 Environment: ipython<|eot_id|>""",
     'qwen': """<|im_start|>system
 You are a helpful assistant.<|im_end|>
-"""
+""",
+    'gemma2': "",
+    'gemma2-it': ""
 
 }
 
