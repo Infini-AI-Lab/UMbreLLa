@@ -60,6 +60,9 @@ class AutoModelLM:
         "meta-llama/Llama-3.3-70B-Instruct": Llama,
         "meta-llama/Llama-3.1-70B-Instruct": Llama,
         "meta-llama/Llama-3.1-8B-Instruct": Llama,
+        
+        "gradientai/Llama-3-8B-Instruct-Gradient-1048k": Llama,
+        
         "meta-llama/Meta-Llama-3-70B-Instruct": Llama,
         "meta-llama/Meta-Llama-3-8B-Instruct": Llama,
         "meta-llama/Llama-3.2-1B-Instruct": Llama,

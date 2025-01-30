@@ -8,6 +8,7 @@ from .llama_layer import LlamaLayer, LlamaAwqLayer, LlamaPackedLayer
 from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
 from tqdm import tqdm
+
 class Llama(LLMBase):
     def __init__(self, 
         model_name: str,
@@ -78,8 +79,8 @@ class Llama(LLMBase):
             layer_idx :int, 
             hidden_states: torch.FloatTensor, 
             position_ids: torch.LongTensor, 
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor=None,
+            storage_ids: torch.LongTensor=None):
 
         residual = hidden_states
         bsz, q_len, _ = hidden_states.size()
@@ -118,8 +119,8 @@ class Llama(LLMBase):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor=None,
+            storage_ids: torch.LongTensor=None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens)  
         for idx in range(self.num_layers):
