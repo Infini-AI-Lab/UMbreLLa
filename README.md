@@ -186,6 +186,7 @@ Evaluated on `ananyarn/Algorithm_and_Python_Source_Code`.
 ### 2.1 Install
 ```bash
 conda create -n umbrella python=3.10
+conda activate umbrella
 bash install.sh
 ```
 ### 2.2 CLI Chatbot

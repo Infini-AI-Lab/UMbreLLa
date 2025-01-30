@@ -1,0 +1,15 @@
+{
+    "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+    "offload": false,
+    "max_length": 2048,
+    "num_cache_layers": 0,
+    "generation_length": 256,
+    "max_turns": 16,
+    "topk": 32,
+    "temperature": 0.6,
+    "topp": 0.9,
+    "repetition_penalty": 1.05,
+    "exit_layer":16,
+    "engine": "ar",
+    "template": "meta-llama3"
+}

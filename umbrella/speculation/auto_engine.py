@@ -1,8 +1,10 @@
 from .dynamic_speculation_engine import DynamicSpeculationEngine
 from .static_speculation_engine import StaticSpeculationEngine
+from .ar_engine import AREngine
 
 class AutoEngine:
     _ENGINE_MAPPING = {
+        'ar': AREngine,
         'static': StaticSpeculationEngine,
         'dynamic': DynamicSpeculationEngine  
     }
@@ -17,6 +19,9 @@ class AutoEngine:
         engine_class = cls._ENGINE_MAPPING[engine_name]
         draft_model_name = kwargs.pop("draft_model", None)
         target_model_name = kwargs.pop("model", None)
-        assert draft_model_name is not None
         assert target_model_name is not None
+
+        if draft_model_name is None:
+            return engine_class(model_name=target_model_name, device=device, **kwargs)
+        
         return engine_class(draft_model_name=draft_model_name, target_model_name=target_model_name,device=device, **kwargs)
