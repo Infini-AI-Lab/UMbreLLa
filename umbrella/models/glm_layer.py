@@ -1,6 +1,6 @@
 from __future__ import annotations
 import torch
-from transformers.models.gemma2.modeling_glm import GlmDecoderLayer
+from transformers.models.glm.modeling_glm import GlmDecoderLayer
 from ..quantization.awq_utils import AwqLinear
 
 # refers to https://github.com/huggingface/transformers/blob/main/src/transformers/models/glm/modeling_glm.py#L319
