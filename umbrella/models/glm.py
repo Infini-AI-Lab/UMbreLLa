@@ -1,6 +1,6 @@
-from transformers import Gemma2ForCausalLM, Gemma2Config
-# from transformers.models.gemma2.modeling_gemma2 import Gemma2RotaryEmbedding
-from transformers import GLM4ForCausalLM, GLM4Config
+# from transformers import Gemma2ForCausalLM, Gemma2Config
+# from transformers.models.gemma2.modeling_gemma2 import
+from transformers.models.glm.modeling_glm import GlmForCausalLM, GlmConfig
 import torch
 import torch.nn.functional as F
 import gc
@@ -26,7 +26,7 @@ class GLM4(LLMBase):
         self.batch_size = batch_size
         self.device = device
         self.dtype = dtype
-        self.config = Gemma2Config.from_pretrained(model_name)
+        self.config = GlmConfig.from_pretrained(model_name)
         self.model_name = model_name
         self.max_length = max_length
         self.hidden_size = self.config.hidden_size
@@ -45,7 +45,7 @@ class GLM4(LLMBase):
     def alloc(self, **kwargs):
         self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype,
                                  batch_size=self.batch_size)
-        hf_model = GLM4ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
+        hf_model = GlmForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
             self.lm_head = self.embed_tokens
