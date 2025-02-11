@@ -6,7 +6,7 @@ from umbrella.utils import TextColors
 logger = setup_logger()
 import torch
 from umbrella.templates import Prompts, SysPrompts
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM, MistralForCausalLM
 from umbrella.speculation.speculation_utils import make_causal_mask, is_sentence_complete_regex, find_first_element_position
 import argparse
 import time
@@ -30,6 +30,7 @@ text = user_prompt.format(text)
 text = system_prompt + text
 
 tokenizer = AutoTokenizer.from_pretrained(args.model)
+
 tokens = tokenizer.encode(text=text, return_tensors="pt").to(DEVICE)
 
 llm = AutoModelLM.from_pretrained(
