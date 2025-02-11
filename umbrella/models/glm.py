@@ -6,8 +6,7 @@ import torch.nn.functional as F
 import gc
 import flashinfer
 from ..attn.cache import KV_Cache, StaticKV_Cache
-from .gemma_layer import Gemma2Layer
-from .glm_layer import GLM4Layer, GLM4AwqLayer
+from .glm_layer import GLM4Layer
 from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph, layer_norm_gemma
 from tqdm import tqdm
@@ -94,9 +93,12 @@ class GLM4(LLMBase):
         residual = hidden_states
         bsz, q_len, _ = hidden_states.size()
 
+        # Layer norm at the input
         hidden_states = layer_norm(hidden_states, buffer.input_layernorm_variance_epsilon,
                                    buffer.input_layernorm_weight)
         bsz, q_len, _ = hidden_states.size()
+
+        # Attention computation
         query_states = F.linear(hidden_states, buffer.wq)
         key_states = F.linear(hidden_states, buffer.wk)
         value_states = F.linear(hidden_states, buffer.wv)
@@ -111,13 +113,18 @@ class GLM4(LLMBase):
         )
         hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
 
+        # Post-attention and residual connection
         hidden_states = F.linear(hidden_states, buffer.wo)
         hidden_states = residual + hidden_states
         residual = hidden_states
+
+        # Layer norm after attention
         hidden_states = layer_norm(hidden_states, buffer.post_attention_layernorm_variance_epsilon,
                                    buffer.post_attention_layernorm_weight)
-        up = F.linear(hidden_states, buffer.up_proj)
-        gate = F.linear(hidden_states, buffer.gate_proj)
+
+        # MLP
+        gate_up = F.linear(hidden_states, buffer.gate_up_proj)
+        gate, up = gate_up.chunk(2, dim=-1)  # Split into gate and up
         gate = F.silu(gate)
         hidden_states = gate * up
         hidden_states = F.linear(hidden_states, buffer.down_proj)

@@ -39,7 +39,7 @@ class Gemma2Layer:
         self.wv :torch.Tensor= hf_layer.self_attn.v_proj.weight.detach()
         self.wo :torch.Tensor= hf_layer.self_attn.o_proj.weight.detach()
 
-        self.gate_proj = hf_layer.mlp.gate_proj.weight.detach()
+        self.gate_proj = hf_layer.mlp.gate_up_proj.weight.detach()
         self.up_proj = hf_layer.mlp.up_proj.weight.detach()
         self.down_proj = hf_layer.mlp.down_proj.weight.detach()
 
