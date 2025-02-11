@@ -25,6 +25,11 @@ template = args.template
 system_prompt = SysPrompts[template]
 user_prompt = Prompts[template]
 
+if torch.cuda.is_available():
+    print(f"Using GPU: {torch.cuda.get_device_name(0)}")
+else:
+    print("CUDA is not available.")
+
 text = "Tell me what you know about Reinforcement Learning in 100 words."
 text = user_prompt.format(text)
 text = system_prompt + text
