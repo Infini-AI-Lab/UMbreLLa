@@ -1,6 +1,7 @@
 from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
 from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph
 from .gemma import Gemma2
+from glm import GLM4
 class AutoModelLM:
     """
     自动模型加载器，根据模型类型动态加载对应的类。
@@ -105,7 +106,8 @@ class AutoModelLM:
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwq,
         "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq,
         "google/gemma-2-2b-it": Gemma2,
-        "google/gemma-2-2b": Gemma2
+        "google/gemma-2-2b": Gemma2,
+        "THUDM/glm-4-9b-chat": GLM4
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
