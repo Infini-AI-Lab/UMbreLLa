@@ -1,6 +1,6 @@
 from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
 from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph
-from .gemma import Gemma2
+from .mistral import Mistral, MistralAwq, MistralOffload, MistralAwqOffload, MistralCudagraph
 class AutoModelLM:
     """
     自动模型加载器，根据模型类型动态加载对应的类。
@@ -17,6 +17,9 @@ class AutoModelLM:
         "meta-llama/Llama-3.1-8B-Instruct": LlamaOffload,
         "meta-llama/Meta-Llama-3-70B-Instruct": LlamaOffload,
         "meta-llama/Meta-Llama-3-8B-Instruct": LlamaOffload,
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-8B":LlamaOffload,
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-70B":LlamaOffload,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B":QwenOffload,
         "Qwen/Qwen2.5-Coder-72B-Instruct": QwenOffload,
         "Qwen/Qwen2.5-Coder-32B-Instruct": QwenOffload,
         "Qwen/Qwen2.5-Coder-14B-Instruct": QwenOffload,
@@ -47,8 +50,8 @@ class AutoModelLM:
         "Qwen/Qwen2.5-32B-Instruct-AWQ": QwenAwqOffload,
         "Qwen/Qwen2.5-72B-Instruct-AWQ": QwenAwqOffload,
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwqOffload,
-        "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwqOffload
-        
+        "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwqOffload,
+        "mistralai/Mistral-7B-v0.3": MistralOffload,   # Mistral 7B added by EJ
     }
     
     _MODEL_MAPPING = {
@@ -73,6 +76,12 @@ class AutoModelLM:
         "Zhuominc/Coder-400M-IT": Llama,
         "Zhuominc/FastCode-500M": Llama,
         "InfiniAILab/CodeDrafter-500M": Llama,
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-8B":Llama,
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-70B":Llama,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B":Qwen,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B":Qwen,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B":Qwen,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B":Qwen,
         "Qwen/Qwen2.5-Coder-72B-Instruct": Qwen,
         "Qwen/Qwen2.5-Coder-32B-Instruct": Qwen,
         "Qwen/Qwen2.5-Coder-14B-Instruct": Qwen,
@@ -104,8 +113,7 @@ class AutoModelLM:
         "Qwen/Qwen2.5-72B-Instruct-AWQ": QwenAwq,
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwq,
         "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq,
-        "google/gemma-2-2b-it": Gemma2,
-        "google/gemma-2-2b": Gemma2
+        "mistralai/Mistral-7B-v0.3": Mistral,   # Mistral 7B added by EJ
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
@@ -122,6 +130,7 @@ class AutoModelLM:
         "Zhuominc/Coder-400M-IT": LlamaCudagraph,
         "Zhuominc/FastCode-500M": LlamaCudagraph,
         "InfiniAILab/CodeDrafter-500M": LlamaCudagraph,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B":QwenCudagraph,
         "Qwen/Qwen2.5-Coder-72B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-32B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-14B-Instruct": QwenCudagraph,
@@ -136,7 +145,8 @@ class AutoModelLM:
         "Qwen/Qwen2.5-14B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-32B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-72B-Instruct": QwenCudagraph,
-        "Qwen/QwQ-32B-Preview": QwenCudagraph
+        "Qwen/QwQ-32B-Preview": QwenCudagraph, 
+        "mistralai/Mistral-7B-v0.3": MistralCudagraph,   # Mistral 7B added by EJ
     }
     
     @classmethod
