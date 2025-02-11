@@ -53,7 +53,7 @@ class GLM4(LLMBase):
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)
 
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
-        self.norm_variance_epsilon = hf_model.model.norm.eps
+        self.norm_variance_epsilon = hf_model.model.norm.variance_epsilon
 
         self.inv_freq = hf_model.model.rotary_emb.inv_freq.detach().to(self.device)
         self.attention_scaling = hf_model.model.rotary_emb.attention_scaling
