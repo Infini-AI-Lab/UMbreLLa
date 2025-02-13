@@ -148,6 +148,7 @@ class AutoModelLM:
         "Qwen/Qwen2.5-72B-Instruct": QwenCudagraph,
         "Qwen/QwQ-32B-Preview": QwenCudagraph,
         "mistralai/Mistral-7B-Instruct-v0.3": MistralCudagraph,
+        "mistralai/Ministral-8B-Instruct-2410": MistralCudagraph
     }
     
     @classmethod

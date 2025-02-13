@@ -107,11 +107,13 @@ class StaticKV_Cache:
         self.max_length = max_length
         self.device = device
         self.dtype = dtype
+        self.head_dim = getattr(config, 'head_dim', config.hidden_size // config.num_attention_heads)
+        
         self.k_cache = torch.zeros(
             config.num_hidden_layers,
             config.num_key_value_heads,
             max_length,
-            config.hidden_size // config.num_attention_heads,
+            self.head_dim,
             device=self.device,
             dtype=self.dtype
         )
@@ -120,7 +122,7 @@ class StaticKV_Cache:
             config.num_hidden_layers,
             config.num_key_value_heads,
             max_length,
-            config.hidden_size // config.num_attention_heads,
+            self.head_dim,
             device=self.device,
             dtype=self.dtype
         )
@@ -128,7 +130,6 @@ class StaticKV_Cache:
         self.kv_offset = 0
         self.num_key_value_heads = config.num_key_value_heads
         self.num_attention_heads = config.num_attention_heads
-        self.head_dim = getattr(config, 'head_dim', config.hidden_size // config.num_attention_heads)
         self.num_key_value_groups = config.num_attention_heads // config.num_key_value_heads
 
     
