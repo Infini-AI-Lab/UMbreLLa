@@ -21,7 +21,9 @@ Prompts = {
 <start_of_turn>model
 """,
 
-'gemma2': "{}"
+'gemma2': "{}",
+'mistral': "[INST] {} [/INST]"
+
 }
 
 SysPrompts = {
@@ -35,7 +37,8 @@ Environment: ipython<|eot_id|>""",
 You are a helpful assistant.<|im_end|>
 """,
     'gemma2': "",
-    'gemma2-it': ""
+    'gemma2-it': "",
+    'mistral': "",
 
 }
 

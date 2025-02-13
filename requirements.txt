@@ -6,3 +6,5 @@ optimum==1.23.3
 autoawq==0.2.7.post3
 autoawq-kernels==0.0.8
 gradio
+protobuf
+sentencepiece
