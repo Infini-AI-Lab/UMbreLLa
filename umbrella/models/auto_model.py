@@ -109,6 +109,8 @@ class AutoModelLM:
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwq,
         "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq,
         "google/gemma-2-2b-it": Gemma2,
+        "google/gemma-2-9b-it": Gemma2,
+        "google/gemma-2-27b-it": Gemma2,
         "google/gemma-2-2b": Gemma2,
         "mistralai/Mistral-7B-Instruct-v0.3": Mistral,
         "solidrust/Mistral-7B-Instruct-v0.3-AWQ": MistralAwq,
