@@ -51,7 +51,7 @@ eval_tokenized_datasets = eval_raw_datasets.map(preprocess_function, batched=Tru
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
 training_args = TrainingArguments(
-    output_dir="./results",
+    output_dir=args.output_dir,
     learning_rate=1e-4,
     per_device_train_batch_size=args.bsz,
     per_device_eval_batch_size=args.bsz,
