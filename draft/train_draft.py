@@ -21,7 +21,8 @@ train_data_files= [
         "train/chunk1/example_train_10*.jsonl.zst", 
         "train/chunk1/example_train_11*.jsonl.zst", 
         "train/chunk1/example_train_12*.jsonl.zst",
-        "train/chunk1/example_train_13*.jsonl.zst"
+        "train/chunk1/example_train_13*.jsonl.zst",
+        "train/chunk1/example_train_14*.jsonl.zst"
 ]
 train_raw_datasets = load_dataset("cerebras/SlimPajama-627B", data_files=train_data_files, split="train")
 
@@ -59,7 +60,9 @@ training_args = TrainingArguments(
     bf16=True,
     save_only_model=True,
     save_steps=5000,
-    save_total_limit=2
+    save_total_limit=2,
+    eval_strategy="steps",
+    save_strategy="steps"
 )
 
 # 初始化 Trainer
