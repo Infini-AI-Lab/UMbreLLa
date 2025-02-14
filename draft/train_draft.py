@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, DataCollatorForLanguageModeling, TrainingArguments, Trainer, AutoModelForCausalLM, Qwen2ForCausalLM
+from transformers import AutoTokenizer, DataCollatorForLanguageModeling, TrainingArguments, Trainer, AutoModelForCausalLM, AutoConfig
 from datasets import load_dataset
 import json
 import argparse
@@ -9,10 +9,8 @@ parser.add_argument('--config', type=str, default="./config.json",help='model co
 parser.add_argument('--bsz', type=int, default=4, help='generation length')
 args = parser.parse_args()
 
-with open(args.config, "r") as f:
-    config = json.load(f)
-
-model_name = args.model
+config = AutoConfig.from_pretrained(args.config)
+model_name = args.tokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 model = AutoModelForCausalLM.from_config(config)
