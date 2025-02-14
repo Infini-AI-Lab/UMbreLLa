@@ -12,6 +12,7 @@ args = parser.parse_args()
 config = AutoConfig.from_pretrained(args.config)
 model_name = args.tokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer.pad_token = tokenizer.eos_token
 
 model = AutoModelForCausalLM.from_config(config)
 
