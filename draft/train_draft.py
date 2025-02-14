@@ -6,6 +6,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--tokenizer', type=str, default="mistralai/Mistral-Small-24B-Instruct-2501",help='tokenizer')
 parser.add_argument('--config', type=str, default="./config.json",help='model config')
+parser.add_argument('--output_dir', type=str, default="mistral",help='output directory')
 parser.add_argument('--bsz', type=int, default=4, help='generation length')
 args = parser.parse_args()
 
@@ -62,7 +63,8 @@ training_args = TrainingArguments(
     save_steps=5000,
     save_total_limit=2,
     eval_strategy="steps",
-    save_strategy="steps"
+    save_strategy="steps",
+    eval_steps=5000
 )
 
 # 初始化 Trainer
