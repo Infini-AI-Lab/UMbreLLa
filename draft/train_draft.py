@@ -42,8 +42,8 @@ def preprocess_function(examples):
 
     return output
 
-train_tokenized_datasets = train_raw_datasets.map(preprocess_function, batched=True)
-eval_tokenized_datasets = eval_raw_datasets.map(preprocess_function, batched=True)
+train_tokenized_datasets = train_raw_datasets.map(preprocess_function, batched=True, num_proc=8)
+eval_tokenized_datasets = eval_raw_datasets.map(preprocess_function, batched=True, num_proc=8)
 
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
