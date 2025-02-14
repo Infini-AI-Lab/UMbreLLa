@@ -31,9 +31,9 @@ def preprocess_function(examples):
     
     
     output = tokenizer(
-        examples["problem"] + "\n\n" + examples["solution"],
+        examples["text"],
         truncation=True,
-        max_length=2048,
+        max_length=1024,
         padding="max_length"
     )
 
