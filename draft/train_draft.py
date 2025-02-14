@@ -17,6 +17,8 @@ if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
 model = AutoModelForCausalLM.from_config(config)
+total_params = sum(p.numel() for p in model.parameters())
+print(f"total_params: {total_params:,}")
 
 train_data_files= [
         "train/chunk1/example_train_10*.jsonl.zst", 
