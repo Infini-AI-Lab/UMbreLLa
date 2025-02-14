@@ -22,8 +22,11 @@ Prompts = {
 """,
 
 'gemma2': "{}",
-'mistral': "[INST] {} [/INST]"
-
+'mistral': "[INST] {} [/INST]",
+'glm4': """<|user|>
+{}<|end|>
+<|assistant|>
+"""
 }
 
 SysPrompts = {
@@ -39,6 +42,9 @@ You are a helpful assistant.<|im_end|>
     'gemma2': "",
     'gemma2-it': "",
     'mistral': "",
+    'glm4': """<|system|>
+You are a helpful assistant.
+"""
 
 }
 
