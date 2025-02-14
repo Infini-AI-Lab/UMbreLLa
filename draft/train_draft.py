@@ -12,7 +12,8 @@ args = parser.parse_args()
 config = AutoConfig.from_pretrained(args.config)
 model_name = args.tokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-tokenizer.pad_token = tokenizer.eos_token
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
 
 model = AutoModelForCausalLM.from_config(config)
 
@@ -40,8 +41,8 @@ def preprocess_function(examples):
 
     return output
 
-train_tokenized_datasets = train_raw_datasets.map(preprocess_function, batched=False)
-eval_tokenized_datasets = eval_raw_datasets.map(preprocess_function, batched=False)
+train_tokenized_datasets = train_raw_datasets.map(preprocess_function, batched=True)
+eval_tokenized_datasets = eval_raw_datasets.map(preprocess_function, batched=True)
 
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
