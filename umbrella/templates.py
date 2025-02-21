@@ -14,7 +14,9 @@ Prompts = {
    'qwen': """<|im_start|>user
 {}<|im_end|>
 <|im_start|>assistant
-"""
+""",
+    'mistral-24b': """<s>[INST] {} [/INST]""",
+    'mistral-7b': """<s>[INST] {} [/INST]"""
 }
 
 SysPrompts = {
@@ -26,8 +28,9 @@ You are a knowledgeable, efficient, and direct AI assistant. Provide concise ans
 Environment: ipython<|eot_id|>""",
     'qwen': """<|im_start|>system
 You are a helpful assistant.<|im_end|>
-"""
-
+""",
+    'mistral-24b': """<s>[INST] You are a knowledgeable, efficient, and direct AI assistant. Provide concise answers and focus on key information. [/INST]""",
+    'mistral-7b': """<s>[INST] You are a helpful AI assistant. Provide concise and informative responses. [/INST]"""
 }
 
 ExtraPrompts = {

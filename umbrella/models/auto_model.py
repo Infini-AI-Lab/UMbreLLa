@@ -1,5 +1,6 @@
 from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
 from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph
+from .mistral import Mistral, MistralOffload, MistralAwq, MistralAwqOffload, MistralCudagraph
 class AutoModelLM:
     """
     自动模型加载器，根据模型类型动态加载对应的类。
@@ -111,7 +112,9 @@ class AutoModelLM:
         "Qwen/Qwen2.5-32B-Instruct-AWQ": QwenAwq,
         "Qwen/Qwen2.5-72B-Instruct-AWQ": QwenAwq,
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwq,
-        "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq
+        "casperhansen/deepseek-r1-distill-qwen-32b-awq": QwenAwq,
+        "mistralai/Mistral-Small-24B-Instruct-2501": Mistral,
+        "mistralai/Mistral-7B-Instruct-v0.3": Mistral
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
