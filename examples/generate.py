@@ -20,7 +20,6 @@ parser.add_argument('--template', type=str, default="meta-llama3", help='prompt 
 parser.add_argument('--G', type=int, default=512, help='generation length')
 parser.add_argument('--offload', action='store_true', help="offload the model")
 parser.add_argument('--cuda_graph', action='store_true', help="whether use cuda graph")
-parser.add_argument('--d', type=int, default=0, help="whether use debug mode")
 args = parser.parse_args()
 DEVICE = "cuda:0"
 DTYPE = torch.float16
@@ -53,7 +52,6 @@ llm = AutoModelLM.from_pretrained(
     device=DEVICE,
     config=config
 )
-print('llm', llm.config)
 
 eos_tokens = llm.config.eos_token_id
 if not isinstance(eos_tokens, list):
