@@ -8,6 +8,9 @@ from .llama_layer import LlamaLayer, LlamaAwqLayer, LlamaPackedLayer
 from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
 from tqdm import tqdm
+"""
+Standard LLmMA
+"""
 class Llama(LLMBase):
     def __init__(self, 
         model_name: str,
@@ -60,7 +63,8 @@ class Llama(LLMBase):
         self.sin_cache = self.sin_cache.to(self.dtype)
         
         self.layers :list[LlamaLayer] = []
-        
+
+        ## loop hf_model.model.layers, and transfer to format LlamaLayer, and store it to self.layers
         for idx, hf_layer in enumerate(hf_model.model.layers):
             layer = LlamaLayer(idx)
             layer.init_parameters(hf_layer=hf_layer)
@@ -120,7 +124,6 @@ class Llama(LLMBase):
             position_ids: torch.LongTensor,
             attention_mask: torch.FloatTensor,
             storage_ids: torch.LongTensor):
-        
         hidden_states = F.embedding(input_ids, self.embed_tokens)  
         for idx in range(self.num_layers):
                 hidden_states = self.layer_compute(self.layers[idx], idx, hidden_states, position_ids, attention_mask, storage_ids)
@@ -141,7 +144,9 @@ class Llama(LLMBase):
         
         self.kv_cache.clear()
 
-
+"""
+Load weights of different layers to different devices. 
+"""
 class LlamaOffload(Llama):
     def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.float16):
         super().__init__(model_name, batch_size, max_length, device, dtype)
@@ -218,7 +223,9 @@ class LlamaOffload(Llama):
         logits = F.linear(hidden_states, self.lm_head).float()
         return logits
 
-
+"""
+Acitivation-aware Quantization
+"""
 class LlamaAwq(Llama):
     
         
@@ -320,7 +327,8 @@ class LlamaAwq(Llama):
         hidden_states = hidden_states.reshape(b, s, h)
         logits = F.linear(hidden_states, self.lm_head).float()
         return logits
-    
+
+"Combination of Offload and AWQ"
 class LlamaAwqOffload(LlamaOffload):
     
     def alloc(self, **kwargs):

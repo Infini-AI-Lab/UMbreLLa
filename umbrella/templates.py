@@ -15,15 +15,8 @@ Prompts = {
 {}<|im_end|>
 <|im_start|>assistant
 """,
-
-'gemma2-it': """<start_of_turn>user
-{}<end_of_turn>
-<start_of_turn>model
-""",
-
-'gemma2': "{}",
-'mistral': "[INST] {} [/INST]"
-
+    'mistral-24b': """<s>[INST] {} [/INST]""",
+    'mistral-7b': """<s>[INST] {} [/INST]"""
 }
 
 SysPrompts = {
@@ -36,10 +29,8 @@ Environment: ipython<|eot_id|>""",
     'qwen': """<|im_start|>system
 You are a helpful assistant.<|im_end|>
 """,
-    'gemma2': "",
-    'gemma2-it': "",
-    'mistral': "",
-
+    'mistral-24b': """<s>[INST] You are a knowledgeable, efficient, and direct AI assistant. Provide concise answers and focus on key information. [/INST]""",
+    'mistral-7b': """<s>[INST] You are a helpful AI assistant. Provide concise and informative responses. [/INST]"""
 }
 
 ExtraPrompts = {
