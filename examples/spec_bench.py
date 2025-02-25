@@ -98,7 +98,7 @@ for idx, prompt in enumerate(prompts):
     inputs = system_prompt + inputs
     engine.prefill(inputs)
     print(TextColors.colorize(prompt["turns"][0], 'green'))
-    num_tokens, decode_time, step = engine.speculative_decoding(max_new_tokens=GEN_LEN)
+    num_tokens, decode_time, step = engine.decoding(max_new_tokens=GEN_LEN)
     total_time += decode_time
     total_decode_tokens += num_tokens
     large_model_steps += step

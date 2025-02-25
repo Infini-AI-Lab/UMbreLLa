@@ -34,7 +34,7 @@ for i in range(MAX_TURNS):
         prompt = system_prompt + prompt
         print(TextColors.colorize("Assistant:", "blue"), end=" ")
         engine.prefill(prompt)
-        engine.speculative_decoding(max_new_tokens=GEN_LEN)
+        engine.decoding(max_new_tokens=GEN_LEN)
     else:
         prompt = input(TextColors.colorize("User: ", "blue"))
         if prompt == "BYE":
@@ -43,7 +43,7 @@ for i in range(MAX_TURNS):
         prompt = user_prompt.format(prompt)
         print(TextColors.colorize("Assistant:", "blue"), end=" ")
         engine.append(prompt)
-        engine.speculative_decoding(max_new_tokens=GEN_LEN)
+        engine.decoding(max_new_tokens=GEN_LEN)
     
     if not engine.validate_status():
         logger.info(TextColors.colorize("Exceeding Maximum Contexts. Terminate Infini AI Chatbot. Thanks for using. Bye!", "cyan"))

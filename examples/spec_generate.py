@@ -49,10 +49,10 @@ text2 = user_prompt.format(text2)
 engine.initialize()
 
 engine.prefill(text1)
-engine.speculative_decoding(max_new_tokens=GEN_LEN)
+engine.decoding(max_new_tokens=GEN_LEN)
 
 engine.append(text2)
-engine.speculative_decoding(max_new_tokens=GEN_LEN)
+engine.decoding(max_new_tokens=GEN_LEN)
 
 engine.reset()
 

@@ -46,7 +46,7 @@ for idx, prompt in enumerate(prompts):
     
     engine.prefill(inputs)
     print(TextColors.colorize(prompt["Algorithm"], 'green'))
-    num_tokens, decode_time, step = engine.speculative_decoding(max_new_tokens=GEN_LEN)
+    num_tokens, decode_time, step = engine.decoding(max_new_tokens=GEN_LEN)
     if num_tokens >= filter_length:
         total_time += decode_time
         total_decode_tokens += num_tokens

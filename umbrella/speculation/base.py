@@ -58,3 +58,8 @@ class BaseEngine(ABC):
     @abstractmethod
     def generate_stream(self, **api_args):
         raise NotImplementedError
+    
+    @abstractmethod
+    def decoding(self, max_new_tokens):
+        raise NotImplementedError
+    

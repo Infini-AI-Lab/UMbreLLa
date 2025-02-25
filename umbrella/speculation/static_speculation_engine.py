@@ -255,6 +255,10 @@ class StaticSpeculationEngine(BaseEngine):
         return dec_len, (t2 - t1), large_model_step
     
     @torch.inference_mode()
+    def decoding(self, max_new_tokens):
+        return self.speculative_decoding(max_new_tokens)
+    
+    @torch.inference_mode()
     def build_tree(self):
         
         for step in range(self.tree_depth):
