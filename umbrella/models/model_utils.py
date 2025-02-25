@@ -63,6 +63,22 @@ def layer_norm(
     hidden_states = hidden_states.reshape(b, s, h)
     return hidden_states
 
+def fused_layer_norm(
+    hidden_states: torch.Tensor,
+    residual: torch.Tensor,
+    layernorm_variance_epsilon: float,
+    layernorm_weight: torch.Tensor,
+):  
+    b, s, h = hidden_states.shape
+    
+    hidden_states = hidden_states.reshape(b * s, h)
+    residual = residual.reshape(b * s, h)
+    flashinfer.norm.fused_add_rmsnorm(hidden_states, residual, layernorm_weight, layernorm_variance_epsilon)
+    hidden_states = hidden_states.reshape(b, s, h)
+    residual = residual.reshape(b, s, h)
+    
+    return hidden_states, residual
+
 def layer_norm_gemma(
     hidden_states: torch.Tensor,
     layernorm_variance_epsilon: float,

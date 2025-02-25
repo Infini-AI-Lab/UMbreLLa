@@ -6,7 +6,7 @@ import flashinfer
 from ..attn.cache import KV_Cache, StaticKV_Cache
 from .llama_layer import LlamaLayer, LlamaAwqLayer, LlamaPackedLayer
 from .base import LLMBase
-from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
+from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph, fused_layer_norm
 from tqdm import tqdm
 class Llama(LLMBase):
     def __init__(self, 
@@ -59,10 +59,10 @@ class Llama(LLMBase):
         self.cos_cache = self.cos_cache.to(self.dtype)
         self.sin_cache = self.sin_cache.to(self.dtype)
         
-        self.layers :list[LlamaLayer] = []
+        self.layers :list[LlamaPackedLayer] = []
         
         for idx, hf_layer in enumerate(hf_model.model.layers):
-            layer = LlamaLayer(idx)
+            layer = LlamaPackedLayer(idx)
             layer.init_parameters(hf_layer=hf_layer)
             layer.to(self.device)
             self.layers.append(layer)
@@ -74,7 +74,7 @@ class Llama(LLMBase):
 
     @torch.inference_mode()
     def layer_compute(self, 
-            buffer: LlamaLayer,
+            buffer: LlamaPackedLayer,
             layer_idx :int, 
             hidden_states: torch.FloatTensor, 
             position_ids: torch.LongTensor, 
@@ -86,9 +86,12 @@ class Llama(LLMBase):
         
         hidden_states = layer_norm(hidden_states, buffer.input_layernorm_variance_epsilon, buffer.input_layernorm_weight)
         bsz, q_len, _ = hidden_states.size()
-        query_states = F.linear(hidden_states, buffer.wq)
-        key_states = F.linear(hidden_states, buffer.wk)
-        value_states = F.linear(hidden_states, buffer.wv)
+        
+        qkv = F.linear(hidden_states, buffer.wqkv)
+        query_states = qkv[...,:self.hidden_size]
+        key_states = qkv[...,self.hidden_size:self.hidden_size + self.head_dim * self.num_key_value_heads]
+        value_states = qkv[...,self.hidden_size + self.head_dim * self.num_key_value_heads:]
+        
         query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim)
         key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim)
         value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim)
@@ -101,9 +104,7 @@ class Llama(LLMBase):
         hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
         
         hidden_states = F.linear(hidden_states, buffer.wo)
-        hidden_states = residual + hidden_states
-        residual = hidden_states
-        hidden_states = layer_norm(hidden_states, buffer.post_attention_layernorm_variance_epsilon, buffer.post_attention_layernorm_weight)
+        hidden_states, residual = fused_layer_norm(hidden_states, residual, buffer.post_attention_layernorm_variance_epsilon, buffer.post_attention_layernorm_weight)
         up = F.linear(hidden_states, buffer.up_proj)
         gate = F.linear(hidden_states, buffer.gate_proj)
         gate = F.silu(gate)
