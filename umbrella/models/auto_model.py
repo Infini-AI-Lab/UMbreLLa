@@ -2,6 +2,7 @@ from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagrap
 from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph
 from .gemma import Gemma2
 from .mistral import Mistral, MistralAwqOffload, MistralOffload, MistralCudagraph, MistralAwq
+from .glm import GLM4
 class AutoModelLM:
     """
     自动模型加载器，根据模型类型动态加载对应的类。
@@ -117,7 +118,8 @@ class AutoModelLM:
         "mistralai/Mistral-Small-24B-Instruct-2501": Mistral,
         "stelterlab/Mistral-Small-24B-Instruct-2501-AWQ": MistralAwq,
         "PyrTools/Ministral-8B-Instruct-2410-AWQ": MistralAwq,
-        "mistralai/Ministral-8B-Instruct-2410": Mistral
+        "mistralai/Ministral-8B-Instruct-2410": Mistral,
+        "THUDM/glm-4-9b-chat": GLM4
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
