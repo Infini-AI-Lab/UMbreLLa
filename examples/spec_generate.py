@@ -1,7 +1,7 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-from umbrella.speculation.dynamic_speculation_engine import DynamicSpeculationEngine
-from umbrella.speculation.static_speculation_engine import StaticSpeculationEngine
+from umbrella.engine.dynamic_speculation_engine import DynamicSpeculationEngine
+from umbrella.engine.static_speculation_engine import StaticSpeculationEngine
 from umbrella.templates import Prompts, SysPrompts
 import argparse
 parser = argparse.ArgumentParser()

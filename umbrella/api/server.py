@@ -4,7 +4,7 @@ from queue import Queue
 from .api_utils import send_data, receive_data
 from ..logging_config import setup_logger
 from ..utils import TextColors
-from ..speculation.auto_engine import AutoEngine
+from ..engine.auto_engine import AutoEngine
 logger = setup_logger()
 
 class APIServer:

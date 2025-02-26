@@ -3,7 +3,7 @@ import argparse
 import time
 import torch
 import os
-from umbrella.speculation.speculation_utils import make_causal_mask
+from umbrella.engine.speculation_utils import make_causal_mask
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default="meta-llama/Llama-3.1-8B-Instruct",help='model')
