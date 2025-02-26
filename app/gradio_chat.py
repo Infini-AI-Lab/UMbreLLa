@@ -1,5 +1,5 @@
 import gradio as gr
-from umbrella.speculation.auto_engine import AutoEngine
+from umbrella.engine.auto_engine import AutoEngine
 from umbrella.logging_config import setup_logger
 import argparse
 import json

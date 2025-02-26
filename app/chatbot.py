@@ -1,4 +1,4 @@
-from umbrella.speculation.auto_engine import AutoEngine
+from umbrella.engine.auto_engine import AutoEngine
 from umbrella.logging_config import setup_logger
 from umbrella.utils import TextColors
 from umbrella.templates import Prompts, SysPrompts

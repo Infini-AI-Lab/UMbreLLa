@@ -7,7 +7,7 @@ logger = setup_logger()
 import torch
 from umbrella.templates import Prompts, SysPrompts
 from transformers import AutoTokenizer
-from umbrella.speculation.speculation_utils import make_causal_mask, is_sentence_complete_regex, find_first_element_position
+from umbrella.engine.speculation_utils import make_causal_mask, is_sentence_complete_regex, find_first_element_position
 import argparse
 import time
 parser = argparse.ArgumentParser()

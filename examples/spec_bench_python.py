@@ -1,8 +1,8 @@
 import json
 import os
-from umbrella.speculation.dynamic_speculation_engine import DynamicSpeculationEngine
-from umbrella.speculation.static_speculation_engine import StaticSpeculationEngine
-from umbrella.speculation.auto_engine import AutoEngine
+from umbrella.engine.dynamic_speculation_engine import DynamicSpeculationEngine
+from umbrella.engine.static_speculation_engine import StaticSpeculationEngine
+from umbrella.engine.auto_engine import AutoEngine
 from umbrella.logging_config import setup_logger
 from umbrella.utils import TextColors
 from umbrella.templates import Prompts, SysPrompts

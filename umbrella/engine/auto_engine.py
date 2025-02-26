@@ -1,10 +1,11 @@
 from .dynamic_speculation_engine import DynamicSpeculationEngine
 from .static_speculation_engine import StaticSpeculationEngine
-
+from .ar_engine import AREngine
 class AutoEngine:
     _ENGINE_MAPPING = {
         'static': StaticSpeculationEngine,
-        'dynamic': DynamicSpeculationEngine  
+        'dynamic': DynamicSpeculationEngine,
+        'ar': AREngine
     }
     
     

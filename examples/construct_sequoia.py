@@ -4,7 +4,7 @@ from datasets import load_dataset
 from umbrella.sequoia_utils import measure_acceptance_rate, generate_sequoia_tree
 from umbrella.templates import SysPrompts, Prompts
 from umbrella.models.auto_model import AutoModelLM
-from umbrella.speculation.speculation_utils import make_causal_mask
+from umbrella.engine.speculation_utils import make_causal_mask
 import argparse
 import time
 import torch
