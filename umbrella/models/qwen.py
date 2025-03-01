@@ -125,8 +125,8 @@ class Qwen(LLMBase):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor = None,
+            storage_ids: torch.LongTensor = None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens)  
         
@@ -205,8 +205,8 @@ class QwenOffload(Qwen):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor = None,
+            storage_ids: torch.LongTensor = None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens)
         if self.buffer[0].layer_idx != 0:
@@ -314,8 +314,8 @@ class QwenAwq(Qwen):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor = None,
+            storage_ids: torch.LongTensor = None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens) 
         

@@ -54,10 +54,10 @@ class KV_Cache:
             new_k_cache :torch.Tensor,
             new_v_cache :torch.Tensor,
             layer_idx :int,
-            storage_ids: torch.LongTensor
+            storage_ids: torch.LongTensor = None
             ):
 
-        new_kv_len = storage_ids.shape[0]
+        new_kv_len = storage_ids.shape[0] if storage_ids is not None else new_k_cache.shape[0]
         if layer_idx == 0:
             self.kv_offset += new_kv_len
         self.k_cache[layer_idx][self.kv_offset - new_kv_len:self.kv_offset] = new_k_cache
@@ -69,21 +69,33 @@ class KV_Cache:
         key_states :torch.Tensor, 
         value_states :torch.Tensor,
         layer_idx, 
-        storage_ids :torch.Tensor,
-        attention_mask :torch.Tensor,
+        storage_ids :torch.Tensor = None,
+        attention_mask :torch.Tensor = None,
         logits_soft_cap = 0):
         
         key_states, value_states = self.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)
-        hidden_states = flashinfer.single_prefill_with_kv_cache(
-                q = query_states[0],
-                k = key_states,
-                v = value_states,
-                kv_layout="NHD",
-                custom_mask=attention_mask[:,:self.kv_offset],
-                allow_fp16_qk_reduction=True,
-                logits_soft_cap = logits_soft_cap
-            )
         
+        if attention_mask is not None:
+            hidden_states = flashinfer.single_prefill_with_kv_cache(
+                    q = query_states[0],
+                    k = key_states,
+                    v = value_states,
+                    kv_layout="NHD",
+                    custom_mask=attention_mask[:,:self.kv_offset],
+                    allow_fp16_qk_reduction=True,
+                    logits_soft_cap = logits_soft_cap
+                )
+        
+        else:
+            hidden_states = flashinfer.single_prefill_with_kv_cache(
+                    q = query_states[0],
+                    k = key_states,
+                    v = value_states,
+                    kv_layout="NHD",
+                    allow_fp16_qk_reduction=True,
+                    logits_soft_cap = logits_soft_cap,
+                    causal=True
+                )
         return hidden_states
         
     def clear(self):

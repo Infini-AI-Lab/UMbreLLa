@@ -18,6 +18,10 @@ class AutoEngine:
         engine_class = cls._ENGINE_MAPPING[engine_name]
         draft_model_name = kwargs.pop("draft_model", None)
         target_model_name = kwargs.pop("model", None)
-        assert draft_model_name is not None
-        assert target_model_name is not None
-        return engine_class(draft_model_name=draft_model_name, target_model_name=target_model_name,device=device, **kwargs)
+        if engine_name in ['static', 'dynamic']:
+            assert draft_model_name is not None
+            assert target_model_name is not None
+            return engine_class(draft_model_name=draft_model_name, target_model_name=target_model_name,device=device, **kwargs)
+
+        else:
+            return engine_class(model_name=target_model_name,device=device, **kwargs)

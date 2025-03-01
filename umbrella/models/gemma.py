@@ -138,8 +138,8 @@ class Gemma2(LLMBase):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor = None,
+            storage_ids: torch.LongTensor = None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens)  
         normalizer = torch.tensor(self.hidden_size**.5, dtype = hidden_states.dtype)

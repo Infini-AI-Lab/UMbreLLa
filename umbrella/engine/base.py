@@ -11,14 +11,6 @@ class BaseEngine(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def verify(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def build_tree(self):
-        raise NotImplementedError
-    
-    @abstractmethod
     def prefill(self, text:str):
         raise NotImplementedError
     
@@ -32,11 +24,6 @@ class BaseEngine(ABC):
     
     @abstractmethod
     def _append(self, input_ids:torch.LongTensor):
-        raise NotImplementedError
-    
-    
-    @abstractmethod
-    def speculative_decoding(self, max_new_tokens: int):
         raise NotImplementedError
     
     @abstractmethod

@@ -10,8 +10,8 @@ setup(
     author_email="chenzhuoming911@gmail.com",
     url="https://github.com/Infini-AI-Lab/UMbreLLa",
     license="Apache-2.0",
-    packages=find_packages(exclude=["examples", "app", "draft"]),
-    python_requires=">=3.10",
+    packages=find_packages(include=["umbrella"]),
+    python_requires=">=3.9",
     install_requires=[],
     classifiers=[
         "Programming Language :: Python :: 3",

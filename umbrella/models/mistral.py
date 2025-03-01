@@ -117,8 +117,8 @@ class Mistral(LLMBase):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor = None,
+            storage_ids: torch.LongTensor = None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens)  
         for idx in range(self.num_layers):
@@ -196,8 +196,8 @@ class MistralOffload(Mistral):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor = None,
+            storage_ids: torch.LongTensor = None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens)
         if self.buffer[0].layer_idx != 0:
@@ -304,8 +304,8 @@ class MistralAwq(Mistral):
     def inference(self,
             input_ids: torch.LongTensor,
             position_ids: torch.LongTensor,
-            attention_mask: torch.FloatTensor,
-            storage_ids: torch.LongTensor):
+            attention_mask: torch.FloatTensor = None,
+            storage_ids: torch.LongTensor = None):
         
         hidden_states = F.embedding(input_ids, self.embed_tokens) 
         
