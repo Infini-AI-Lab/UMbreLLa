@@ -155,6 +155,8 @@ class AutoModelLM:
         "Qwen/Qwen2.5-32B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-72B-Instruct": QwenCudagraph,
         "Qwen/QwQ-32B-Preview": QwenCudagraph,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": QwenCudagraph,
+        "agentica-org/DeepScaleR-1.5B-Preview": QwenCudagraph,
         "mistralai/Mistral-7B-Instruct-v0.3": MistralCudagraph,
         "mistralai/Ministral-8B-Instruct-2410": MistralCudagraph
     }

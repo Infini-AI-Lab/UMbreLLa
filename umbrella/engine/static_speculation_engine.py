@@ -42,6 +42,7 @@ class StaticSpeculationEngine(BaseEngine):
         self.topp = kwargs.pop("topp", 0.9)
         self.repetition_penalty = kwargs.pop("repetition_penalty", 1.0)
         self.topk = kwargs.pop("topk", 32)
+        self.max_round = kwargs.pop("max_round", 3)
         self.config = kwargs
 
     
@@ -128,7 +129,7 @@ class StaticSpeculationEngine(BaseEngine):
             self.sampling_callables[i] = cuda_graph_for_sampling_argmax_gather(device=self.device, 
             idx_len=idx_len, num_samples=num_samples, dtype=torch.float32, dim=self.vocab_size, index_len=len(self.sample_gather_indices[i]))
         
-        self.uniform_samples = torch.rand(3, self.tree_size).to(self.device)
+        self.uniform_samples = torch.rand(self.max_round, self.tree_size).to(self.device)
         
     def prefill(self, text:str):
         input_ids = self.tokenizer.encode(text=text, return_tensors="pt").to(device=self.device)
