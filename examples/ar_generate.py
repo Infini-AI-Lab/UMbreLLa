@@ -3,6 +3,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from umbrella.engine.ar_engine import AREngine
 from umbrella.templates import Prompts, SysPrompts
 import argparse
+import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default="meta-llama/Llama-3.1-8B-Instruct",help='model')
 parser.add_argument('--template', type=str, default="meta-llama3",help='prompt template')
@@ -17,6 +18,7 @@ user_prompt = Prompts[template]
 
 MODEL_NAME = args.model
 DEVICE = "cuda:0"
+torch.cuda.set_device(DEVICE)
 GEN_LEN = args.G
 model_name = args.model
 

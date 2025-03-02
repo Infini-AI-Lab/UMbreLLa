@@ -4,8 +4,9 @@ from umbrella.engine.dynamic_speculation_engine import DynamicSpeculationEngine
 from umbrella.engine.static_speculation_engine import StaticSpeculationEngine
 from umbrella.templates import Prompts, SysPrompts
 import argparse
+import torch
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, default="hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4",help='model')
+parser.add_argument('--model', type=str, default="meta-llama/Llama-3.1-8B-Instruct",help='model')
 parser.add_argument('--draft_model', type=str, default="meta-llama/Llama-3.2-1B-Instruct",help='draft model')
 parser.add_argument('--template', type=str, default="meta-llama3",help='prompt template')
 parser.add_argument('--G', type=int, default=512, help='generation length')
@@ -18,7 +19,8 @@ system_prompt = SysPrompts[template]
 user_prompt = Prompts[template]
 
 MODEL_NAME = args.model
-DEVICE = "cuda:0"
+DEVICE = "cuda:1"
+torch.cuda.set_device(DEVICE)
 GEN_LEN = args.G
 draft_model_name = args.draft_model
 target_model_name = args.model
