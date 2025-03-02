@@ -77,6 +77,8 @@ class AutoModelLM:
         "Zhuominc/Coder-400M-IT": Llama,
         "Zhuominc/FastCode-500M": Llama,
         "InfiniAILab/CodeDrafter-500M": Llama,
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-8B": Llama,
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-70B": Llama,
         "Qwen/Qwen2.5-Coder-72B-Instruct": Qwen,
         "Qwen/Qwen2.5-Coder-32B-Instruct": Qwen,
         "Qwen/Qwen2.5-Coder-14B-Instruct": Qwen,
