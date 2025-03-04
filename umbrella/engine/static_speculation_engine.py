@@ -312,7 +312,10 @@ class StaticSpeculationEngine(BaseEngine):
             sampled_tokens = target_logits.argmax(dim=-1)
         
         else:
-            sampled_tokens, _ = flashinfer.sampling.top_k_top_p_sampling_from_logits(target_logits/self.temperature, self.uniform_samples, self.topk, self.topp)
+            target_logits = apply_topk(target_logits, self.topk)
+            proba = torch.softmax(target_logits/self.temperature, dim=-1)
+            proba = flashinfer.sampling.top_p_renorm_prob(proba, self.topp)
+            sampled_tokens = torch.multinomial(proba, num_samples=1).squeeze(-1)
             
             
         speculated_tokens = self.tokens[0, self.num_nodes:self.num_draft_tokens_this_iter]
