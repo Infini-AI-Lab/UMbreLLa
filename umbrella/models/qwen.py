@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 import gc
 import flashinfer
-from ..attn.cache import KV_Cache, StaticKV_Cache
+from ..attn.cache import KV_Cache, StaticKV_Cache, H2OCache
 from .qwen_layer import QwenLayer, QwenAwqLayer, QwenPackedLayer
 from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
@@ -38,7 +38,16 @@ class Qwen(LLMBase):
 
     def alloc(self, **kwargs):
         
-        self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
+        cache_config = kwargs.pop("cache_config", "full")
+        kv_budget = kwargs.pop("kv_budget")
+        full_layers = kwargs.pop("full_layers")
+        self.kv_cache = H2OCache(self.config, kv_budget=kv_budget, max_length=self.max_length, 
+           full_layers=full_layers, device=self.device, dtype=self.dtype, batch_size=self.batch_size
+        ) if cache_config == "h2o" else KV_Cache(
+        self.config, max_length=self.max_length, 
+        device=self.device, dtype=self.dtype, 
+        batch_size=self.batch_size) 
+        
         hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
