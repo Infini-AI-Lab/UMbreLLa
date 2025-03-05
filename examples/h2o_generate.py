@@ -24,8 +24,9 @@ engine = AREngine(
     model_name=MODEL_NAME,
     device=DEVICE,
     max_length=35000,
-    kv_budget = 512,
-    full_layers = [0,1,4, 8, 12, 16, 20, 24],
+    kv_budget = 256,
+    local_budget = 1024,
+    full_layers = [0,1,14,21],
     cache_config="h2o"
 )
 
