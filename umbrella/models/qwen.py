@@ -39,9 +39,11 @@ class Qwen(LLMBase):
     def alloc(self, **kwargs):
         
         cache_config = kwargs.pop("cache_config", "full")
-        kv_budget = kwargs.pop("kv_budget")
-        full_layers = kwargs.pop("full_layers")
-        self.kv_cache = H2OCache(self.config, kv_budget=kv_budget, max_length=self.max_length, 
+        kv_budget = kwargs.pop("kv_budget", 1024)
+        local_budget = kwargs.pop("local_budget", 1024)
+        full_layers = kwargs.pop("full_layers", [0, 1])
+        
+        self.kv_cache = H2OCache(self.config, kv_budget=kv_budget, local_budget=local_budget, max_length=self.max_length, 
            full_layers=full_layers, device=self.device, dtype=self.dtype, batch_size=self.batch_size
         ) if cache_config == "h2o" else KV_Cache(
         self.config, max_length=self.max_length, 

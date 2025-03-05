@@ -114,6 +114,7 @@ class H2OCache:
         config :AutoConfig,
         batch_size :int = 1,
         kv_budget: int = 256,
+        local_budget: int = 256,
         max_length :int = 256, 
         full_layers : list[int] = [0,1],
         device :str = 'cuda:0',
@@ -121,13 +122,15 @@ class H2OCache:
         self.config = config
         self.max_length = max_length
         self.kv_budget = kv_budget
+        self.local_budget = local_budget
+        self.pointer = 0
         self.full_layers = full_layers
         self.device = device
         self.dtype = dtype
         self.head_dim = getattr(config, 'head_dim', config.hidden_size // config.num_attention_heads)
         self.k_cache = [torch.zeros(
             config.num_key_value_heads,
-            max_length if i in self.full_layers else self.kv_budget,
+            max_length if i in self.full_layers else self.kv_budget + self.local_budget,
             self.head_dim,
             device=self.device,
             dtype=self.dtype
@@ -135,7 +138,7 @@ class H2OCache:
 
         self.v_cache = [torch.zeros(
             config.num_key_value_heads,
-            max_length if i in self.full_layers else self.kv_budget,
+            max_length if i in self.full_layers else self.kv_budget + self.local_budget,
             self.head_dim,
             device=self.device,
             dtype=self.dtype
@@ -145,14 +148,14 @@ class H2OCache:
         self.score = torch.zeros(
             config.num_hidden_layers,
             config.num_key_value_heads,
-            self.kv_budget,
+            self.kv_budget + self.local_budget,
             device=self.device,
             dtype=torch.bfloat16
         )
         
         self.num_layers = config.num_hidden_layers
         self.kv_offset = 0
-        self.decay = 0.8
+        self.decay = 0.95
         self.sink_tokens = 16
         self.num_key_value_heads = config.num_key_value_heads
         self.num_attention_heads = config.num_attention_heads
@@ -173,7 +176,7 @@ class H2OCache:
         if layer_idx == 0:
                 self.kv_offset += q_len
         
-        if self.kv_offset <= self.kv_budget or layer_idx in self.full_layers:
+        if self.kv_offset <= self.kv_budget + self.local_budget or layer_idx in self.full_layers:
             
             self.k_cache[layer_idx][:,self.kv_offset - q_len:self.kv_offset] = key_states[0].transpose(0,1)
             self.v_cache[layer_idx][:,self.kv_offset - q_len:self.kv_offset] = value_states[0].transpose(0,1)
@@ -199,15 +202,26 @@ class H2OCache:
                 hidden_states = hidden_states.reshape(bsz, self.num_attention_heads, q_len, -1)
                 hidden_states = hidden_states.transpose(1, 2).contiguous()
         else:   
-                self.score[layer_idx][:,:self.sink_tokens] = torch.inf
-                indices = self.score[layer_idx].argmin(dim=-1, keepdim=True)
-                self.score[layer_idx].scatter_(dim=-1, index=indices, value=0)
-                indices = indices[:,:,None].expand(self.num_key_value_heads, 1, self.head_dim)
-                key_states = key_states.squeeze()[:,None,:]
-                value_states = value_states.squeeze()[:,None,:]
                 
-                self.k_cache[layer_idx].scatter_(dim=-2, index=indices, src=key_states)
-                self.v_cache[layer_idx].scatter_(dim=-2, index=indices, src=value_states)
+                replace_indices = self.score[layer_idx][:,self.sink_tokens:self.kv_budget].argmin(dim=-1, keepdim=True)
+                replace_indices = replace_indices + self.sink_tokens
+                pointer = self.pointer + self.kv_budget
+                recent_key = self.k_cache[layer_idx][:,pointer:pointer+1]
+                recent_value = self.v_cache[layer_idx][:,pointer:pointer+1]
+                recent_score = self.score[layer_idx][:,pointer:pointer+1]
+                
+                self.score[layer_idx].scatter_(dim=-1, index=replace_indices, src=recent_score)
+                replace_indices = replace_indices[:,:,None].expand(self.num_key_value_heads, 1, self.head_dim)
+                recent_key = recent_key.squeeze()[:,None,:]
+                recent_value = recent_value.squeeze()[:,None,:]
+                
+                self.k_cache[layer_idx].scatter_(dim=-2, index=replace_indices, src=recent_key)
+                self.v_cache[layer_idx].scatter_(dim=-2, index=replace_indices, src=recent_value)
+                
+                self.k_cache[layer_idx][:,pointer:pointer+1] = key_states[0].transpose(0,1)
+                self.v_cache[layer_idx][:,pointer:pointer+1] = value_states[0].transpose(0,1)
+                self.score[layer_idx][:,pointer:pointer+1] = 0
+                self.pointer = (self.pointer + 1) % self.local_budget
                 
                 query_states = query_states.reshape(self.num_key_value_heads, q_len * self.num_key_value_groups, self.head_dim)
                 attn_weights = torch.matmul(query_states, self.k_cache[layer_idx].transpose(1, 2)) / math.sqrt(self.head_dim)
