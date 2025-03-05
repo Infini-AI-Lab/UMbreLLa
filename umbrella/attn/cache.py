@@ -123,7 +123,6 @@ class H2OCache:
         self.max_length = max_length
         self.kv_budget = kv_budget
         self.local_budget = local_budget
-        self.pointer = 0
         self.full_layers = full_layers
         self.device = device
         self.dtype = dtype
@@ -155,6 +154,7 @@ class H2OCache:
         
         self.num_layers = config.num_hidden_layers
         self.kv_offset = 0
+        self.pointer = 0
         self.decay = 0.95
         self.sink_tokens = 16
         self.num_key_value_heads = config.num_key_value_heads
@@ -238,10 +238,11 @@ class H2OCache:
         return hidden_states
         
     def clear(self):
-        self.k_cache.zero_()
-        self.v_cache.zero_()
+        for i in range(self.num_layers):
+            self.k_cache[i].zero_()
+            self.v_cache[i].zero_()
         self.kv_offset = 0
-    
+        self.pointer = 0
     def set_kv_len(self, kv_len :int):
             self.kv_offset = kv_len
 
