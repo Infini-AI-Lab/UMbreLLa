@@ -22,7 +22,9 @@ Prompts = {
 """,
 
 'gemma2': "{}",
-'mistral': "[INST] {} [/INST]"
+'mistral': "[INST] {} [/INST]",
+'ibm-granite': """\n<|start_of_role|>user<|end_of_role|>{}<|end_of_text|>
+<|start_of_role|>assistant<|end_of_role|>"""
 
 }
 
@@ -39,6 +41,10 @@ You are a helpful assistant.<|im_end|>
     'gemma2': "",
     'gemma2-it': "",
     'mistral': "",
+    'ibm-granite': """<|start_of_role|>system<|end_of_role|>Knowledge Cutoff Date: April 2024.
+Today's Date: March 05, 2025.
+You are Granite, developed by IBM. You are a helpful AI assistant.<|end_of_text|>"""
+
 
 }
 
