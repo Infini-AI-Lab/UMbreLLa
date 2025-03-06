@@ -76,9 +76,9 @@ with gr.Blocks(theme="monochrome", title="Chatbot") as demo:
     with gr.Row():
         max_new_tokens_slider = gr.Slider(
             minimum=32,
-            maximum=512,
+            maximum=16384,
             value=128,
-            step=1,
+            step=128,
             label="max_new_tokens",
         )
         temperature_slider = gr.Slider(

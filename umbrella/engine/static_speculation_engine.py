@@ -101,6 +101,7 @@ class StaticSpeculationEngine(BaseEngine):
         self.target_model.alloc(**self.config)
         
         self.draft_model.initialize_cuda_graph(graph_capture_list)
+        logger.info(TextColors.colorize("CUDAGRAPH INITIALIZE {}".format(graph_capture_list), "magenta"))
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.target_model_name)
         self.vocab_size = self.target_model.config.vocab_size
