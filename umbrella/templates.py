@@ -25,6 +25,7 @@ Prompts = {
 'mistral': "[INST] {} [/INST]",
 'qwq': "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n<think>\n"
 
+
 }
 
 SysPrompts = {
