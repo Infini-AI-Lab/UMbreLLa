@@ -53,7 +53,7 @@ class Qwen(LLMBase):
         hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens
+            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
 
@@ -174,7 +174,7 @@ class QwenOffload(Qwen):
         hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens
+            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
 
@@ -248,7 +248,7 @@ class QwenAwq(Qwen):
         hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens
+            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
@@ -352,7 +352,7 @@ class QwenAwqOffload(QwenOffload):
         hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens
+            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
@@ -445,7 +445,7 @@ class QwenCudagraph(Qwen):
         hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens
+            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
 

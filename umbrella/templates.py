@@ -22,7 +22,8 @@ Prompts = {
 """,
 
 'gemma2': "{}",
-'mistral': "[INST] {} [/INST]"
+'mistral': "[INST] {} [/INST]",
+'qwq': "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n<think>\n"
 
 }
 
@@ -39,6 +40,7 @@ You are a helpful assistant.<|im_end|>
     'gemma2': "",
     'gemma2-it': "",
     'mistral': "",
+    'qwq': "",
 
 }
 
