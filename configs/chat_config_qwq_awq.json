@@ -1,6 +1,6 @@
 {
     "model": "Qwen/QwQ-32B-AWQ",
-    "draft_model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "draft_model": "ZMC2019/QwQ-0.5B",
     "offload": false,
     "cuda_graph": true,
     "max_length": 2048,

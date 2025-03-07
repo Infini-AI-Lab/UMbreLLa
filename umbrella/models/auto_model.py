@@ -100,6 +100,9 @@ class AutoModelLM:
         "Qwen/Qwen2.5-72B-Instruct": Qwen,
         "Qwen/QwQ-32B-Preview": Qwen,
         "Qwen/QwQ-32B": Qwen,
+        "ZMC2019/QwQ-0.5B": Qwen,
+        "ZMC2019/QwQ-1.5B": Qwen,
+        "ZMC2019/QwQ-7B": Qwen,
         "agentica-org/DeepScaleR-1.5B-Preview": Qwen,
         "alamios/DeepSeek-R1-DRAFT-Qwen2.5-0.5B": Qwen,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": Qwen,
@@ -158,6 +161,9 @@ class AutoModelLM:
         "Qwen/Qwen2.5-Coder-3B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-1.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-0.5B-Instruct": QwenCudagraph,
+        "ZMC2019/QwQ-0.5B": QwenCudagraph,
+        "ZMC2019/QwQ-1.5B": QwenCudagraph,
+        "ZMC2019/QwQ-7B": QwenCudagraph,
         "Qwen/Qwen2.5-0.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-1.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-3B-Instruct": QwenCudagraph,
@@ -171,7 +177,8 @@ class AutoModelLM:
         "alamios/DeepSeek-R1-DRAFT-Qwen2.5-0.5B": QwenCudagraph,
         "agentica-org/DeepScaleR-1.5B-Preview": QwenCudagraph,
         "mistralai/Mistral-7B-Instruct-v0.3": MistralCudagraph,
-        "mistralai/Ministral-8B-Instruct-2410": MistralCudagraph
+        "mistralai/Ministral-8B-Instruct-2410": MistralCudagraph,
+        "ZMC2019/Mistral-150M-Instruct": MistralCudagraph
     }
     
     @classmethod

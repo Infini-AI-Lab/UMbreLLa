@@ -1,6 +1,6 @@
 {
     "model": "Qwen/QwQ-32B",
-    "draft_model": "agentica-org/DeepScaleR-1.5B-Preview",
+    "draft_model": "ZMC2019/QwQ-1.5B",
     "offload": true,
     "max_length": 8192,
     "num_cache_layers": 4,
