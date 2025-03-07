@@ -62,6 +62,8 @@ class AwqLinear:
     
     def apply(self, x: torch.Tensor):
         
+        x_dtype = x.dtype
+        x = x.to(torch.float16)
         out_shape = x.shape[:-1] + (self.out_features,)
       
         FP16_MATMUL_HEURISTIC_CONDITION = x.shape[0] * x.shape[1] >= 1024
@@ -83,5 +85,6 @@ class AwqLinear:
         if len(out.shape) == 2:
             out = out.unsqueeze(0)
 
+        out = out.to(x_dtype)
         return out
         

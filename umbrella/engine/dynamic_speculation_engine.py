@@ -20,7 +20,7 @@ class DynamicSpeculationEngine(BaseEngine):
     def __init__(self,
         draft_model_name: str,
         target_model_name: str,
-        dtype=torch.float16,
+        dtype=torch.bfloat16,
         device :str = 'cuda:0',
         **kwargs
         ) -> None:

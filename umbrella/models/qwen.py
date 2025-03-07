@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import gc
 import flashinfer
 from ..attn.cache import KV_Cache, StaticKV_Cache, H2OCache
-from .qwen_layer import QwenLayer, QwenAwqLayer, QwenPackedLayer
+from .qwen_layer import QwenLayer, QwenAwqLayer, QwenPackedLayer, QwenPackedOffloadLayer
 from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
 from tqdm import tqdm
@@ -17,7 +17,7 @@ class Qwen(LLMBase):
         batch_size :int = 1,
         max_length :int = 256, 
         device :str = 'cuda:0',
-        dtype = torch.float16) -> None:
+        dtype = torch.bfloat16) -> None:
         
         super().__init__()
         self.batch_size = batch_size
@@ -53,7 +53,7 @@ class Qwen(LLMBase):
         hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
+            self.lm_head = self.embed_tokens
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
 
@@ -162,7 +162,7 @@ class Qwen(LLMBase):
 
 
 class QwenOffload(Qwen):
-    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.float16):
+    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.bfloat16):
         super().__init__(model_name, batch_size, max_length, device, dtype)
         self.load_stream = torch.cuda.Stream(device=device)
     
@@ -174,7 +174,7 @@ class QwenOffload(Qwen):
         hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
+            self.lm_head = self.embed_tokens
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
 
@@ -198,7 +198,7 @@ class QwenOffload(Qwen):
         self.layers :list[QwenLayer] = []
         
         for idx, hf_layer in tqdm(enumerate(hf_model.model.layers), desc="initial offloaded model"):
-            layer = QwenLayer(idx)
+            layer = QwenPackedOffloadLayer(idx)
             layer.init_parameters(hf_layer=hf_layer)
             if idx < self.num_cache_layers:
                 layer.to(self.device)
@@ -208,9 +208,57 @@ class QwenOffload(Qwen):
             
         self.num_layers = len(self.layers)
         assert self.num_layers % 2 == 0
-        self.buffer = [QwenLayer(-1, self.device) for _ in range(2)]
+        self.buffer = [QwenPackedOffloadLayer(-1, self.device) for _ in range(2)]
         self.buffer[0].alloc_space(self.layers[0], self.device)
         self.buffer[1].alloc_space(self.layers[0], self.device)
+    
+    @torch.inference_mode()
+    def layer_compute(self, 
+            buffer: QwenPackedOffloadLayer,
+            layer_idx :int, 
+            hidden_states: torch.FloatTensor, 
+            position_ids: torch.LongTensor, 
+            attention_mask: torch.FloatTensor,
+            storage_ids: torch.LongTensor):
+
+        residual = hidden_states
+        bsz, q_len, _ = hidden_states.size()
+        
+        hidden_states = layer_norm(hidden_states, buffer.input_layernorm_variance_epsilon, buffer.input_layernorm_weight)
+        
+        bsz, q_len, _ = hidden_states.size()
+        
+        qkv = F.linear(hidden_states, buffer.wqkv)
+        qkv = qkv + buffer.bqkv
+        query_states = qkv[...,:self.hidden_size]
+        key_states = qkv[...,self.hidden_size:self.hidden_size + self.head_dim * self.num_key_value_heads]
+        value_states = qkv[...,self.hidden_size + self.head_dim * self.num_key_value_heads:]
+        
+        
+        query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim)
+        key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim)
+        value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim)
+        
+        
+        query_states, key_states = apply_rotary_pos_emb(query_states, key_states, self.cos_cache, self.sin_cache, position_ids)
+        
+        hidden_states = self.kv_cache.compute_attention(
+            query_states, key_states, value_states, layer_idx, storage_ids, attention_mask
+        )
+        hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
+        
+        hidden_states = F.linear(hidden_states, buffer.wo)
+        hidden_states = residual + hidden_states
+        residual = hidden_states
+        hidden_states = layer_norm(hidden_states, buffer.post_attention_layernorm_variance_epsilon, buffer.post_attention_layernorm_weight)
+        up = F.linear(hidden_states, buffer.up_proj)
+        gate = F.linear(hidden_states, buffer.gate_proj)
+        gate = F.silu(gate)
+        hidden_states = gate * up
+        hidden_states = F.linear(hidden_states, buffer.down_proj)
+        hidden_states = residual + hidden_states
+        
+        return hidden_states
     
     @torch.inference_mode()
     def inference(self,
@@ -248,7 +296,7 @@ class QwenAwq(Qwen):
         hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
+            self.lm_head = self.embed_tokens
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
@@ -352,7 +400,7 @@ class QwenAwqOffload(QwenOffload):
         hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
+            self.lm_head = self.embed_tokens
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
         self.norm_weight = hf_model.model.norm.weight.detach().to(self.device)
@@ -432,7 +480,7 @@ class QwenAwqOffload(QwenOffload):
 
 
 class QwenCudagraph(Qwen):
-    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.float16):
+    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.bfloat16):
         super().__init__(model_name, batch_size, max_length, device, dtype)
     
         self.callables = {}
@@ -445,7 +493,7 @@ class QwenCudagraph(Qwen):
         hf_model = Qwen2ForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
         self.embed_tokens = hf_model.model.embed_tokens.weight.detach().to(self.device)
         if self.config.tie_word_embeddings:
-            self.lm_head = self.embed_tokens[:QWEN_2_5_VOCAB_SIZE,:]
+            self.lm_head = self.embed_tokens
         else:
             self.lm_head = hf_model.lm_head.weight.detach().to(self.device)[:,:QWEN_2_5_VOCAB_SIZE]
 
@@ -509,7 +557,7 @@ class QwenCudagraph(Qwen):
         hidden_states = self.kv_cache.compute_attention(
             query_states, key_states, value_states, layer_idx, storage_ids, attention_mask
         )
-        
+
         hidden_states = hidden_states.reshape(bsz, q_len, self.hidden_size)
         hidden_states = F.linear(hidden_states, buffer.wo)
         hidden_states = residual + hidden_states
@@ -521,7 +569,7 @@ class QwenCudagraph(Qwen):
         hidden_states = gate * up
         hidden_states = F.linear(hidden_states, buffer.down_proj)
         hidden_states = residual + hidden_states
-        
+
         return hidden_states
     
     

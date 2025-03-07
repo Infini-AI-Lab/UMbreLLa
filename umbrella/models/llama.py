@@ -14,7 +14,7 @@ class Llama(LLMBase):
         batch_size :int = 1,
         max_length :int = 256, 
         device :str = 'cuda:0',
-        dtype = torch.float16) -> None:
+        dtype = torch.bfloat16) -> None:
         
         super().__init__()
         self.batch_size = batch_size
@@ -144,7 +144,7 @@ class Llama(LLMBase):
 
 
 class LlamaOffload(Llama):
-    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.float16):
+    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.bfloat16):
         super().__init__(model_name, batch_size, max_length, device, dtype)
         self.load_stream = torch.cuda.Stream(device=device)
     
@@ -411,7 +411,7 @@ class LlamaAwqOffload(LlamaOffload):
 
 
 class LlamaCudagraph(Llama):
-    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.float16):
+    def __init__(self, model_name, batch_size = 1, max_length = 256, device = 'cuda:0', dtype=torch.bfloat16):
         super().__init__(model_name, batch_size, max_length, device, dtype)
     
         self.callables = {}
