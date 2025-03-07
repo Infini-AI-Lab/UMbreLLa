@@ -43,7 +43,8 @@ training_args = TrainingArguments(
     save_steps=1000,
     bf16=True,
     save_strategy="steps",
-    warmup_ratio=0.1
+    warmup_ratio=0.1,
+    gradient_checkpointing=True
 )
 
 # 初始化 Trainer
