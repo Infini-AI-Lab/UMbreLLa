@@ -13,8 +13,6 @@ args = parser.parse_args()
 
 
 tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
 
 dataset = load_dataset("llamafactory/OpenR1-Math-94k", split="train")
 
