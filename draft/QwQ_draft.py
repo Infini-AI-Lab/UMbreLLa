@@ -23,7 +23,7 @@ def format_prompt(data):
     return template.format(data["messages"][1]["content"], data["messages"][2]["content"])
 
 def tokenize_function(examples):
-    return tokenizer(format_prompt(examples), truncation=True, padding="max_length", max_length=32768)
+    return tokenizer(format_prompt(examples), truncation=True, max_length=32768)
 
 tokenized_dataset = dataset.map(tokenize_function, remove_columns=["messages"], num_proc=32)
 
