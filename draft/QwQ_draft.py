@@ -44,7 +44,8 @@ training_args = TrainingArguments(
     bf16=True,
     save_strategy="steps",
     warmup_ratio=0.1,
-    gradient_checkpointing=True
+    gradient_checkpointing=True,
+    num_train_epochs=1
 )
 
 # 初始化 Trainer
