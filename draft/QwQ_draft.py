@@ -33,7 +33,7 @@ data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
 training_args = TrainingArguments(
     output_dir=args.output_dir,
-    learning_rate=1e-5,
+    learning_rate=3e-5,
     per_device_train_batch_size=1,
     weight_decay=1e-4,
     lr_scheduler_type="cosine",
@@ -43,7 +43,7 @@ training_args = TrainingArguments(
     save_steps=1000,
     bf16=True,
     save_strategy="steps",
-    warmup_ratio=0.01
+    warmup_ratio=0.1
 )
 
 # 初始化 Trainer
