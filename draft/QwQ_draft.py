@@ -41,6 +41,7 @@ training_args = TrainingArguments(
     save_only_model=True,
     save_safetensors=True,
     save_steps=1000,
+    bf16=True,
     save_strategy="steps",
     warmup_ratio=0.01
 )
