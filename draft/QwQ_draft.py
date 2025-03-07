@@ -7,6 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--tokenizer', type=str, default="Qwen/QwQ-32B",help='tokenizer')
+parser.add_argument('--base', type=str, default="agentica-org/DeepScaleR-1.5B-Preview",help='base model')
 parser.add_argument('--output_dir', type=str, default="QwQ-1.5B",help='output directory')
 args = parser.parse_args()
 
@@ -27,7 +28,7 @@ def tokenize_function(examples):
 
 tokenized_dataset = dataset.map(tokenize_function, remove_columns=["messages"], num_proc=32)
 
-model = AutoModelForCausalLM.from_pretrained("agentica-org/DeepScaleR-1.5B-Preview", _attn_implementation="flash_attention_2")
+model = AutoModelForCausalLM.from_pretrained(args.base, _attn_implementation="flash_attention_2")
 
 data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
