@@ -9,10 +9,11 @@
     "growmap_path": "../umbrella/trees/sequoia_tree-3x4.json",
     "max_turns": 16,
     "topk": 32,
-    "temperature": 0.3,
+    "temperature": 0.6,
     "topp": 0.9,
-    "repetition_penalty": 1.00,
+    "repetition_penalty": 1.05,
     "exit_layer":0,
     "engine": "static",
-    "template": "qwq"
+    "template": "qwq",
+    "dtype": "float16"
 }

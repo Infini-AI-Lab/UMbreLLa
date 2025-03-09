@@ -128,6 +128,7 @@ class AutoModelLM:
         "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq,
         "casperhansen/deepseek-r1-distill-qwen-7b-awq":QwenAwq,
         "Qwen/QwQ-32B-AWQ": QwenAwq,
+        "ZMC2019/QwQ-7B-AWQ": QwenAwq,
         "google/gemma-2-2b-it": Gemma2,
         "google/gemma-2-9b-it": Gemma2,
         "google/gemma-2-27b-it": Gemma2,

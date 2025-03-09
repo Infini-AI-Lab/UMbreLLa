@@ -18,7 +18,7 @@ parser.add_argument('--offload', action='store_true', help="offload the model")
 parser.add_argument('--cuda_graph', action='store_true', help="whether use cuda graph")
 args = parser.parse_args()
 DEVICE = "cuda:0"
-DTYPE = torch.bfloat16
+DTYPE = torch.float16
 MAX_LEN = 2048
 GEN_LEN = args.G
 template = args.template
