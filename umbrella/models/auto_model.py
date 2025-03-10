@@ -134,6 +134,7 @@ class AutoModelLM:
         "google/gemma-2-27b-it": Gemma2,
         "google/gemma-2-2b": Gemma2,
         "mistralai/Mistral-7B-Instruct-v0.3": Mistral,
+        "InfiniAILab/Mistral-150M-Instruct": Mistral,
         "solidrust/Mistral-7B-Instruct-v0.3-AWQ": MistralAwq,
         "mistralai/Mistral-Small-24B-Instruct-2501": Mistral,
         "stelterlab/Mistral-Small-24B-Instruct-2501-AWQ": MistralAwq,
@@ -179,7 +180,7 @@ class AutoModelLM:
         "agentica-org/DeepScaleR-1.5B-Preview": QwenCudagraph,
         "mistralai/Mistral-7B-Instruct-v0.3": MistralCudagraph,
         "mistralai/Ministral-8B-Instruct-2410": MistralCudagraph,
-        "ZMC2019/Mistral-150M-Instruct": MistralCudagraph
+        "InfiniAILab/Mistral-150M-Instruct": MistralCudagraph
     }
     
     @classmethod
