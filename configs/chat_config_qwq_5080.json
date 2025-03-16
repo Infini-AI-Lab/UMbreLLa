@@ -1,0 +1,19 @@
+{
+    "model": "InfiniAILab/QwQ-32B-FP8",
+    "draft_model": "ZMC2019/QwQ-1.5B",
+    "offload": true,
+    "max_length": 8192,
+    "num_cache_layers": 0,
+    "generation_length": 2048,
+    "max_turns": 16,
+    "topk": 32,
+    "temperature": 0.6,
+    "topp": 0.95,
+    "repetition_penalty": 1.00,
+    "width": 16,
+    "num_beams": 24,
+    "depth": 16,
+    "engine": "dynamic",
+    "template": "qwq",
+    "dtype": "bfloat16"
+}

@@ -8,3 +8,4 @@ autoawq-kernels==0.0.8
 gradio
 protobuf
 sentencepiece
+fbgemm_gpu==0.8.0

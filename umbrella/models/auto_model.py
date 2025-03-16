@@ -1,5 +1,5 @@
 from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
-from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph
+from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph, QwenFBGEMM, QwenFBGEMMOffload
 from .gemma import Gemma2
 from .mistral import Mistral, MistralAwqOffload, MistralOffload, MistralCudagraph, MistralAwq
 class AutoModelLM:
@@ -37,6 +37,7 @@ class AutoModelLM:
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B": QwenOffload,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B": QwenOffload,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": QwenOffload,
+        "InfiniAILab/QwQ-32B-FP8": QwenFBGEMMOffload,
         "Qwen/Qwen2.5-Coder-72B-Instruct-AWQ": QwenAwqOffload,
         "Qwen/Qwen2.5-Coder-32B-Instruct-AWQ": QwenAwqOffload,
         "Qwen/Qwen2.5-Coder-14B-Instruct-AWQ": QwenAwqOffload,
@@ -100,9 +101,9 @@ class AutoModelLM:
         "Qwen/Qwen2.5-72B-Instruct": Qwen,
         "Qwen/QwQ-32B-Preview": Qwen,
         "Qwen/QwQ-32B": Qwen,
-        "ZMC2019/QwQ-0.5B": Qwen,
-        "ZMC2019/QwQ-1.5B": Qwen,
-        "ZMC2019/QwQ-7B": Qwen,
+        "InfiniAILab/QwQ-0.5B": Qwen,
+        "InfiniAILab/QwQ-1.5B": Qwen,
+        "InfiniAILab/QwQ-32B-FP8": QwenFBGEMM,
         "agentica-org/DeepScaleR-1.5B-Preview": Qwen,
         "alamios/DeepSeek-R1-DRAFT-Qwen2.5-0.5B": Qwen,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": Qwen,
@@ -128,7 +129,7 @@ class AutoModelLM:
         "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq,
         "casperhansen/deepseek-r1-distill-qwen-7b-awq":QwenAwq,
         "Qwen/QwQ-32B-AWQ": QwenAwq,
-        "ZMC2019/QwQ-7B-AWQ": QwenAwq,
+        "InfiniAILab/QwQ-7B-AWQ": QwenAwq,
         "google/gemma-2-2b-it": Gemma2,
         "google/gemma-2-9b-it": Gemma2,
         "google/gemma-2-27b-it": Gemma2,
@@ -163,9 +164,8 @@ class AutoModelLM:
         "Qwen/Qwen2.5-Coder-3B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-1.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-0.5B-Instruct": QwenCudagraph,
-        "ZMC2019/QwQ-0.5B": QwenCudagraph,
-        "ZMC2019/QwQ-1.5B": QwenCudagraph,
-        "ZMC2019/QwQ-7B": QwenCudagraph,
+        "InfiniAILab/QwQ-0.5B": QwenCudagraph,
+        "InfiniAILab/QwQ-1.5B": QwenCudagraph,
         "Qwen/Qwen2.5-0.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-1.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-3B-Instruct": QwenCudagraph,
