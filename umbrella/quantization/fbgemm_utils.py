@@ -21,6 +21,7 @@ class FBGEMMFP8Linear:
        
         self.weight = module.weight.detach().pin_memory()
         self.weight_scale = module.weight_scale.detach().pin_memory()
+        self.weight_scale = self.weight_scale.to(self.dtype)
         self.input_scale_ub = module.input_scale_ub.detach().pin_memory()
         if module.bias is not None:
             self.bias = module.bias.detach().pin_memory()
@@ -60,30 +61,22 @@ class FBGEMMFP8Linear:
     
     def apply(self, x: torch.Tensor):
         
-        
-        num_tokens = None
-        
-        x_dtype = x.dtype
+        x_dtype = x.dtype 
         x = x.to(torch.bfloat16)
-        
+
         output_shape = (*x.shape[:-1], -1)
+
+        x_dequantized = x 
+        weight_dequantized = self.weight.to(torch.bfloat16) * self.weight_scale  # 反量化权重
+
+        output = torch.matmul(x_dequantized, weight_dequantized.T)
+
         
-        x_quantized, x_scale = torch.ops.fbgemm.quantize_fp8_per_row(
-            x.view(-1, x.shape[-1]), num_tokens, self.input_scale_ub
-        )
-        
-        output = torch.ops.fbgemm.f8f8bf16_rowwise(
-            x_quantized, self.weight, x_scale, self.weight_scale, use_fast_accum=True
-        )
-        
-        
-        output = output + self.bias if self.bias is not None else output
-        
-        output = output.to(x.device)
-        output = output.reshape(output_shape)
-        
+        if self.bias is not None:
+            output = output + self.bias.to(torch.bfloat16)
+
         output = output.to(x_dtype)
-        
-        
+        output = output.reshape(output_shape)
+
         return output
-        
+            
