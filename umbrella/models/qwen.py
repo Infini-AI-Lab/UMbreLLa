@@ -8,7 +8,9 @@ from .qwen_layer import QwenLayer, QwenAwqLayer, QwenPackedLayer, QwenPackedOffl
 from .base import LLMBase
 from .model_utils import apply_rotary_pos_emb, layer_norm, capture_graph
 from tqdm import tqdm
-
+from ..logging_config import setup_logger
+from ..utils import TextColors
+logger = setup_logger()
 QWEN_2_5_VOCAB_SIZE = 151936
 
 class Qwen(LLMBase):
@@ -291,6 +293,10 @@ class QwenAwq(Qwen):
         
     def alloc(self, **kwargs):
         
+        if self.dtype == torch.bfloat16:
+            self.dtype = torch.float16
+            logger.info(TextColors.colorize("AUTOMATICALLY USING FLOAT16 FOR AWQ", "magenta"))
+            
         self.kv_cache = KV_Cache(self.config, max_length=self.max_length, device=self.device, dtype=self.dtype, batch_size=self.batch_size)
         
         hf_model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=self.dtype)
