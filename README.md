@@ -19,9 +19,9 @@
 
 ## News 🚀
 
-**[2025/03/17]** Support QwQ-32B in FP8, achieving **7.54 tokens/sec** on RTX 4090! 🎉
+**[2025/03/17]** Support QwQ-32B in FP8, achieving **7.54 tokens/sec** on 1 x RTX 4090! 🎉
 
-**[2025/03/17]** Support QwQ-32B-AWQ in INT4, achieving **67.98 tokens/sec** on RTX 4090! 🎉
+**[2025/03/17]** Support QwQ-32B-AWQ in INT4, achieving **67.98 tokens/sec** on 1 x RTX 4090 and **6.04 tokens/sec**  on 1 x RTX 3070 (with PCIE3.0)! 🎉
 
 
 ## 1. Models Supported and Benchmarks
