@@ -1,5 +1,5 @@
 from .llama import Llama, LlamaAwq, LlamaOffload, LlamaAwqOffload, LlamaCudagraph
-from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph
+from .qwen import Qwen, QwenOffload, QwenAwq, QwenAwqOffload, QwenCudagraph, QwenFBGEMM, QwenFBGEMMOffload
 from .gemma import Gemma2
 from .mistral import Mistral, MistralAwqOffload, MistralOffload, MistralCudagraph, MistralAwq
 from .granite import Granite
@@ -34,6 +34,11 @@ class AutoModelLM:
         "Qwen/Qwen2.5-32B-Instruct": QwenOffload,
         "Qwen/Qwen2.5-72B-Instruct": QwenOffload,
         "Qwen/QwQ-32B-Preview": QwenOffload,
+        "Qwen/QwQ-32B": QwenOffload,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B": QwenOffload,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B": QwenOffload,
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": QwenOffload,
+        "InfiniAILab/QwQ-32B-FP8": QwenFBGEMMOffload,
         "Qwen/Qwen2.5-Coder-72B-Instruct-AWQ": QwenAwqOffload,
         "Qwen/Qwen2.5-Coder-32B-Instruct-AWQ": QwenAwqOffload,
         "Qwen/Qwen2.5-Coder-14B-Instruct-AWQ": QwenAwqOffload,
@@ -49,6 +54,7 @@ class AutoModelLM:
         "Qwen/Qwen2.5-32B-Instruct-AWQ": QwenAwqOffload,
         "Qwen/Qwen2.5-72B-Instruct-AWQ": QwenAwqOffload,
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwqOffload,
+        "Qwen/QwQ-32B-AWQ": QwenAwqOffload,
         "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwqOffload,
         "mistralai/Mistral-7B-Instruct-v0.3": MistralOffload,
         "solidrust/Mistral-7B-Instruct-v0.3-AWQ": MistralAwqOffload,
@@ -95,10 +101,17 @@ class AutoModelLM:
         "Qwen/Qwen2.5-32B-Instruct": Qwen,
         "Qwen/Qwen2.5-72B-Instruct": Qwen,
         "Qwen/QwQ-32B-Preview": Qwen,
+        "Qwen/QwQ-32B": Qwen,
+        "InfiniAILab/QwQ-0.5B": Qwen,
+        "InfiniAILab/QwQ-1.5B": Qwen,
+        "InfiniAILab/QwQ-32B-FP8": QwenFBGEMM,
+        "agentica-org/DeepScaleR-1.5B-Preview": Qwen,
+        "alamios/DeepSeek-R1-DRAFT-Qwen2.5-0.5B": Qwen,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": Qwen,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B": Qwen,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B": Qwen,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B": Qwen,
+        "prithivMLmods/QwQ-R1-Distill-1.5B-CoT": Qwen,
         "Qwen/Qwen2.5-Coder-72B-Instruct-AWQ": QwenAwq,
         "Qwen/Qwen2.5-Coder-32B-Instruct-AWQ": QwenAwq,
         "Qwen/Qwen2.5-Coder-14B-Instruct-AWQ": QwenAwq,
@@ -115,11 +128,15 @@ class AutoModelLM:
         "Qwen/Qwen2.5-72B-Instruct-AWQ": QwenAwq,
         "KirillR/QwQ-32B-Preview-AWQ": QwenAwq,
         "casperhansen/deepseek-r1-distill-qwen-32b-awq":QwenAwq,
+        "casperhansen/deepseek-r1-distill-qwen-7b-awq":QwenAwq,
+        "Qwen/QwQ-32B-AWQ": QwenAwq,
+        "InfiniAILab/QwQ-7B-AWQ": QwenAwq,
         "google/gemma-2-2b-it": Gemma2,
         "google/gemma-2-9b-it": Gemma2,
         "google/gemma-2-27b-it": Gemma2,
         "google/gemma-2-2b": Gemma2,
         "mistralai/Mistral-7B-Instruct-v0.3": Mistral,
+        "InfiniAILab/Mistral-150M-Instruct": Mistral,
         "solidrust/Mistral-7B-Instruct-v0.3-AWQ": MistralAwq,
         "mistralai/Mistral-Small-24B-Instruct-2501": Mistral,
         "stelterlab/Mistral-Small-24B-Instruct-2501-AWQ": MistralAwq,
@@ -151,6 +168,8 @@ class AutoModelLM:
         "Qwen/Qwen2.5-Coder-3B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-1.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-Coder-0.5B-Instruct": QwenCudagraph,
+        "InfiniAILab/QwQ-0.5B": QwenCudagraph,
+        "InfiniAILab/QwQ-1.5B": QwenCudagraph,
         "Qwen/Qwen2.5-0.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-1.5B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-3B-Instruct": QwenCudagraph,
@@ -158,11 +177,14 @@ class AutoModelLM:
         "Qwen/Qwen2.5-14B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-32B-Instruct": QwenCudagraph,
         "Qwen/Qwen2.5-72B-Instruct": QwenCudagraph,
+        "prithivMLmods/QwQ-R1-Distill-1.5B-CoT": QwenCudagraph,
         "Qwen/QwQ-32B-Preview": QwenCudagraph,
         "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": QwenCudagraph,
+        "alamios/DeepSeek-R1-DRAFT-Qwen2.5-0.5B": QwenCudagraph,
         "agentica-org/DeepScaleR-1.5B-Preview": QwenCudagraph,
         "mistralai/Mistral-7B-Instruct-v0.3": MistralCudagraph,
-        "mistralai/Ministral-8B-Instruct-2410": MistralCudagraph
+        "mistralai/Ministral-8B-Instruct-2410": MistralCudagraph,
+        "InfiniAILab/Mistral-150M-Instruct": MistralCudagraph
     }
     
     @classmethod

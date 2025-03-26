@@ -16,7 +16,7 @@ class Gemma2(LLMBase):
             batch_size :int = 1,
             max_length :int = 256,
             device :str = 'cuda:0',
-            dtype = torch.float16) -> None:
+            dtype = torch.bfloat16) -> None:
         super().__init__()
         self.batch_size = batch_size
         self.device = device

@@ -1,0 +1,19 @@
+{
+    "model": "stelterlab/Mistral-Small-24B-Instruct-2501-AWQ",
+    "draft_model": "InfiniAILab/Mistral-150M-Instruct",
+    "offload": true,
+    "max_length": 4096,
+    "num_cache_layers": 0,
+    "generation_length": 512,
+    "max_turns": 16,
+    "topk": 32,
+    "temperature": 0.6,
+    "topp": 0.9,
+    "repetition_penalty": 1.05,
+    "width": 24,
+    "num_beams": 24,
+    "depth": 8,
+    "engine": "dynamic",
+    "template": "mistral",
+    "dtype": "float16"
+}

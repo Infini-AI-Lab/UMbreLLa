@@ -19,7 +19,7 @@ system_prompt = SysPrompts[template]
 user_prompt = Prompts[template]
 
 MODEL_NAME = args.model
-DEVICE = "cuda:1"
+DEVICE = "cuda:0"
 torch.cuda.set_device(DEVICE)
 GEN_LEN = args.G
 draft_model_name = args.draft_model

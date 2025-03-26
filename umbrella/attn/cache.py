@@ -9,7 +9,7 @@ class KV_Cache:
         batch_size :int = 1,
         max_length :int = 256, 
         device :str = 'cuda:0',
-        dtype = torch.float16) -> None:
+        dtype = torch.bfloat16) -> None:
         self.config = config
         self.max_length = max_length
         self.device = device
@@ -120,7 +120,7 @@ class H2OCache:
         max_length :int = 256, 
         full_layers : list[int] = [0,1],
         device :str = 'cuda:0',
-        dtype = torch.float16) -> None:
+        dtype = torch.bfloat16) -> None:
         self.config = config
         self.max_length = max_length
         self.kv_budget = kv_budget
@@ -256,7 +256,7 @@ class StaticKV_Cache:
         batch_size :int = 1,
         max_length :int = 256, 
         device :str = 'cuda:0',
-        dtype = torch.float16) -> None:
+        dtype = torch.bfloat16) -> None:
         self.config = config
         self.max_length = max_length
         self.device = device
@@ -336,11 +336,11 @@ class StaticKV_Cache:
         attn_weights = torch.matmul(query_states, key_states.transpose(1, 2)) / math.sqrt(self.head_dim)
         mask = attention_mask[None,:,:].repeat(1, self.num_key_value_groups, 1)
         
-        attn_weights.masked_fill_(~mask, torch.finfo(attn_weights.dtype).min)
+        attn_weights.masked_fill_(~mask, -torch.inf)
         
         attn_weights = torch.nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
         hidden_states = torch.matmul(attn_weights, value_states)
         hidden_states = hidden_states.reshape(bsz, self.num_attention_heads, q_len, -1)
         hidden_states = hidden_states.transpose(1, 2).contiguous()
-        
+
         return hidden_states

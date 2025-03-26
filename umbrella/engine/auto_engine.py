@@ -1,6 +1,7 @@
 from .dynamic_speculation_engine import DynamicSpeculationEngine
 from .static_speculation_engine import StaticSpeculationEngine
 from .ar_engine import AREngine
+import torch
 class AutoEngine:
     _ENGINE_MAPPING = {
         'static': StaticSpeculationEngine,
@@ -18,10 +19,12 @@ class AutoEngine:
         engine_class = cls._ENGINE_MAPPING[engine_name]
         draft_model_name = kwargs.pop("draft_model", None)
         target_model_name = kwargs.pop("model", None)
+        torch_dtype = kwargs.pop("dtype", "bfloat16")
+        dtype = torch.bfloat16 if torch_dtype == "bfloat16" else torch.float16
         if engine_name in ['static', 'dynamic']:
             assert draft_model_name is not None
             assert target_model_name is not None
-            return engine_class(draft_model_name=draft_model_name, target_model_name=target_model_name,device=device, **kwargs)
+            return engine_class(draft_model_name=draft_model_name, target_model_name=target_model_name,device=device, dtype=dtype, **kwargs)
 
         else:
-            return engine_class(model_name=target_model_name,device=device, **kwargs)
+            return engine_class(model_name=target_model_name,device=device, dtype=dtype, **kwargs)

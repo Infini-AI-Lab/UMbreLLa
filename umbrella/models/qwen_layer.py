@@ -2,6 +2,8 @@ from __future__ import annotations
 import torch
 from transformers.models.qwen2.modeling_qwen2 import Qwen2DecoderLayer
 from ..quantization.awq_utils import AwqLinear
+from ..quantization.fbgemm_utils import FBGEMMFP8Linear
+
 class QwenLayer:
     def __init__(self, layer_idx, device = "cpu") -> None:
         
@@ -204,6 +206,108 @@ class QwenAwqLayer():
         self.layer_idx = layer.layer_idx
 
 
+
+class QwenFBGEMMLayer():
+    def __init__(self, layer_idx, device="cpu"):
+        
+        self.wqkv :torch.Tensor = None
+        self.bqkv :torch.Tensor = None
+        self.wo :torch.Tensor = None
+
+        self.gate_proj = FBGEMMFP8Linear()
+        self.up_proj = FBGEMMFP8Linear()
+        self.down_proj = FBGEMMFP8Linear()
+        
+        
+        self.input_layernorm_weight :torch.Tensor = None
+        self.input_layernorm_variance_epsilon :float = 0.0
+
+        self.post_attention_layernorm_weight :torch.Tensor = None
+        self.post_attention_layernorm_variance_epsilon :float = 0.0
+
+        self.layer_idx = layer_idx
+        self.device = device
+        
+    
+    def init_parameters(self, hf_layer):
+        
+        
+        self.wqkv :torch.Tensor= torch.cat(
+        [
+        hf_layer.self_attn.q_proj.weight.detach(),
+        hf_layer.self_attn.k_proj.weight.detach(),
+        hf_layer.self_attn.v_proj.weight.detach(),
+        ],
+        dim=0
+        )
+        
+        self.bqkv :torch.Tensor= torch.cat(
+        [
+        hf_layer.self_attn.q_proj.bias.detach(),
+        hf_layer.self_attn.k_proj.bias.detach(),
+        hf_layer.self_attn.v_proj.bias.detach(),
+        ],
+        dim=0
+        )
+        
+        self.wo :torch.Tensor= hf_layer.self_attn.o_proj.weight.detach()
+        self.gate_proj.init_parameters(hf_layer.mlp.gate_proj)
+        self.up_proj.init_parameters(hf_layer.mlp.up_proj)
+        self.down_proj.init_parameters(hf_layer.mlp.down_proj)
+        
+        self.input_layernorm_weight = hf_layer.input_layernorm.weight.detach().pin_memory()
+        self.input_layernorm_variance_epsilon = hf_layer.input_layernorm.variance_epsilon
+
+        self.post_attention_layernorm_weight = hf_layer.post_attention_layernorm.weight.detach().pin_memory()
+        self.post_attention_layernorm_variance_epsilon = hf_layer.post_attention_layernorm.variance_epsilon
+    
+    def to(self, device:str = 'cuda:0', non_blocking = True):
+        
+        self.device = device
+        self.input_layernorm_weight = self.input_layernorm_weight.to(device, non_blocking=non_blocking)
+        self.post_attention_layernorm_weight = self.post_attention_layernorm_weight.to(device, non_blocking=non_blocking)
+        
+        self.wqkv = self.wqkv.to(device=device, non_blocking=non_blocking)
+        self.bqkv = self.bqkv.to(device, non_blocking=non_blocking)
+        self.wo = self.wo.to(device=device, non_blocking=non_blocking)
+        
+        self.gate_proj.to(device=device)
+        self.up_proj.to(device=device)
+        self.down_proj.to(device=device)
+        
+    def alloc_space(self, layer: QwenFBGEMMLayer, device):
+
+        self.device = device
+        self.wqkv = torch.zeros_like(layer.wqkv).to(device)
+        self.bqkv = torch.zeros_like(layer.bqkv).to(device)
+        self.wo = torch.zeros_like(layer.wo).to(device)
+
+        self.gate_proj.empty_like(layer.gate_proj)
+        self.up_proj.empty_like(layer.up_proj)
+        self.down_proj.empty_like(layer.down_proj)
+                
+        self.gate_proj.to(device=device)
+        self.up_proj.to(device=device)
+        self.down_proj.to(device=device)
+        
+        self.input_layernorm_weight = torch.zeros_like(layer.input_layernorm_weight).to(device)
+        self.post_attention_layernorm_weight = torch.zeros_like(layer.post_attention_layernorm_weight).to(device)
+    
+    def copy(self, layer: QwenFBGEMMLayer):
+
+        self.wqkv.copy_(layer.wqkv, non_blocking=True)
+        self.bqkv.copy_(layer.bqkv, non_blocking=True)
+        self.wo.copy_(layer.wo, non_blocking=True)
+        self.gate_proj.copy(layer.gate_proj, non_blocking=True)
+        self.up_proj.copy(layer.up_proj, non_blocking=True)
+        self.down_proj.copy(layer.down_proj, non_blocking=True)
+        
+        self.input_layernorm_weight.copy_(layer.input_layernorm_weight, non_blocking=True)
+        self.post_attention_layernorm_weight.copy_(layer.post_attention_layernorm_weight, non_blocking=True)
+        self.input_layernorm_variance_epsilon= layer.input_layernorm_variance_epsilon
+        self.post_attention_layernorm_variance_epsilon = layer.post_attention_layernorm_variance_epsilon
+        self.layer_idx = layer.layer_idx
+        
 class QwenPackedLayer:
     def __init__(self, layer_idx, device = "cpu") -> None:
         
@@ -281,6 +385,99 @@ class QwenPackedLayer:
         self.layer_idx = layer.layer_idx
         
     def alloc_space(self, layer: QwenPackedLayer, device):
+
+        self.device = device
+        self.wqkv = torch.zeros_like(layer.wqkv).to(device)
+        self.bqkv = torch.zeros_like(layer.bqkv).to(device)
+        self.wo = torch.zeros_like(layer.wo).to(device)
+
+
+        self.gate_proj = torch.zeros_like(layer.gate_proj).to(device)
+        self.up_proj = torch.zeros_like(layer.up_proj).to(device)
+        self.down_proj = torch.zeros_like(layer.down_proj).to(device)
+        self.input_layernorm_weight = torch.zeros_like(layer.input_layernorm_weight).to(device)
+        self.post_attention_layernorm_weight = torch.zeros_like(layer.post_attention_layernorm_weight).to(device)
+        
+
+class QwenPackedOffloadLayer:
+    def __init__(self, layer_idx, device = "cpu", target_device = "cuda:0") -> None:
+        
+        self.wqkv :torch.Tensor = None
+        self.bqkv :torch.Tensor = None
+        self.gate_proj :torch.Tensor = None 
+        self.up_proj :torch.Tensor = None
+        self.down_proj :torch.Tensor = None
+
+        self.input_layernorm_weight :torch.Tensor = None
+        self.input_layernorm_variance_epsilon :float = 0.0
+
+        self.post_attention_layernorm_weight :torch.Tensor = None
+        self.post_attention_layernorm_variance_epsilon :float = 0.0
+
+        self.layer_idx = layer_idx
+        self.device = device
+        self.target_device = target_device
+        
+    def init_parameters(self, hf_layer: Qwen2DecoderLayer):
+
+        self.wqkv :torch.Tensor= torch.cat(
+        [
+        hf_layer.self_attn.q_proj.weight.detach(),
+        hf_layer.self_attn.k_proj.weight.detach(),
+        hf_layer.self_attn.v_proj.weight.detach(),
+        ],
+        dim=0
+        ).pin_memory()
+        
+        self.bqkv :torch.Tensor= torch.cat(
+        [
+        hf_layer.self_attn.q_proj.bias.detach(),
+        hf_layer.self_attn.k_proj.bias.detach(),
+        hf_layer.self_attn.v_proj.bias.detach(),
+        ],
+        dim=0
+        ).to(self.target_device)
+        
+        self.wo :torch.Tensor= hf_layer.self_attn.o_proj.weight.detach().pin_memory()
+        self.gate_proj = hf_layer.mlp.gate_proj.weight.detach().pin_memory()
+        self.up_proj = hf_layer.mlp.up_proj.weight.detach().pin_memory()
+        self.down_proj = hf_layer.mlp.down_proj.weight.detach().pin_memory()
+
+        self.input_layernorm_weight = hf_layer.input_layernorm.weight.detach().to(self.target_device)
+        self.input_layernorm_variance_epsilon = hf_layer.input_layernorm.variance_epsilon
+
+        self.post_attention_layernorm_weight = hf_layer.post_attention_layernorm.weight.detach().to(self.target_device)
+        self.post_attention_layernorm_variance_epsilon = hf_layer.post_attention_layernorm.variance_epsilon
+
+    
+    def to(self, device:str = 'cuda:0', non_blocking = True):
+
+        self.device = device
+        self.input_layernorm_weight = self.input_layernorm_weight.to(device, non_blocking=non_blocking)
+        self.post_attention_layernorm_weight = self.post_attention_layernorm_weight.to(device, non_blocking=non_blocking)
+        self.wqkv = self.wqkv.to(device, non_blocking=non_blocking)
+        self.bqkv = self.bqkv.to(device, non_blocking=non_blocking)
+        self.wo = self.wo.to(device, non_blocking=non_blocking)
+        self.gate_proj = self.gate_proj.to(device, non_blocking=non_blocking)
+        self.up_proj = self.up_proj.to(device, non_blocking=non_blocking)
+        self.down_proj =  self.down_proj.to(device, non_blocking=non_blocking)
+
+    def copy(self, layer: QwenPackedOffloadLayer):
+
+        self.wqkv.copy_(layer.wqkv, non_blocking=True)
+        self.bqkv.copy_(layer.bqkv, non_blocking=True)
+        self.wo.copy_(layer.wo, non_blocking=True)
+        self.gate_proj.copy_(layer.gate_proj, non_blocking=True)
+        self.up_proj.copy_(layer.up_proj, non_blocking=True)
+        self.down_proj.copy_(layer.down_proj, non_blocking=True)
+        
+        self.input_layernorm_weight.copy_(layer.input_layernorm_weight, non_blocking=True)
+        self.post_attention_layernorm_weight.copy_(layer.post_attention_layernorm_weight, non_blocking=True)
+        self.input_layernorm_variance_epsilon= layer.input_layernorm_variance_epsilon
+        self.post_attention_layernorm_variance_epsilon = layer.post_attention_layernorm_variance_epsilon
+        self.layer_idx = layer.layer_idx
+        
+    def alloc_space(self, layer: QwenPackedOffloadLayer, device):
 
         self.device = device
         self.wqkv = torch.zeros_like(layer.wqkv).to(device)
