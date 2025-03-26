@@ -140,7 +140,8 @@ class AutoModelLM:
         "mistralai/Mistral-Small-24B-Instruct-2501": Mistral,
         "stelterlab/Mistral-Small-24B-Instruct-2501-AWQ": MistralAwq,
         "PyrTools/Ministral-8B-Instruct-2410-AWQ": MistralAwq,
-        "mistralai/Ministral-8B-Instruct-2410": Mistral
+        "mistralai/Ministral-8B-Instruct-2410": Mistral,
+        "mistralai/Mistral-7B-v0.3": Mistral,
     }
 
     _CUDAGRAPH_MODEL_MAPPING = {
