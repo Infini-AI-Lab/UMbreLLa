@@ -71,7 +71,8 @@ class KV_Cache:
         layer_idx, 
         storage_ids :torch.Tensor = None,
         attention_mask :torch.Tensor = None,
-        logits_soft_cap = 0):
+        logits_soft_cap = 0,
+        sm_scale=None):
         
         key_states, value_states = self.update_kv_cache(key_states[0], value_states[0], layer_idx, storage_ids)
         
@@ -83,7 +84,8 @@ class KV_Cache:
                     kv_layout="NHD",
                     custom_mask=attention_mask[:,:self.kv_offset],
                     allow_fp16_qk_reduction=True,
-                    logits_soft_cap = logits_soft_cap
+                    logits_soft_cap = logits_soft_cap,
+                    sm_scale=sm_scale,
                 )
         
         else:
